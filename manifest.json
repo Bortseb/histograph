@@ -18,7 +18,6 @@
   "name": "histograph",
   "permissions": [
     "tabs",
-    "downloads",
     "history"
   ],
   "version": "1.0"

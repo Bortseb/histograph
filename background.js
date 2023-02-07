@@ -26,10 +26,10 @@ browser.tabs.onCreated.addListener(
   (tabId) => { updateCount(tabId, false);
 });
 
-/*
-browser.tabs.onUpdated.addListener(
-  (tabId) => { console.log("Tab ID:", tabId)}
-);
-*/
+browser.tabs.onUpdated.addListener((tabId, changeInfo, tabInfo) => {
+  if (changeInfo.url) {
+    console.log(`Tab: ${tabId} URL changed to ${changeInfo.url}`);
+  }
+});
 
 updateCount();
