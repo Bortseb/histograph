@@ -7,6 +7,13 @@
   "background": {
       "scripts": ["background.js"]
   },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["page.js"]
+    }
+  ],
+  
   "browser_action": {
     "browser_style": true,
     "default_title": "histograph",
