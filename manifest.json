@@ -1,0 +1,25 @@
+{
+  "browser_specific_settings": {
+    "gecko": {
+      "strict_min_version": "58.0a1"
+    }
+  },
+  "background": {
+      "scripts": ["background.js"]
+  },
+  "browser_action": {
+    "browser_style": true,
+    "default_title": "histograph",
+    "default_popup": "histograph.html"
+  },
+  "description": "Visualize and export your browsing history as a graph.",
+  "homepage_url": "https://github.com/Bortseb/histograph",
+  "manifest_version": 2,
+  "name": "histograph",
+  "permissions": [
+    "tabs",
+    "downloads",
+    "history"
+  ],
+  "version": "1.0"
+}
