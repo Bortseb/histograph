@@ -39,42 +39,41 @@ class Graph {
   }
 }
 
-const graph = new Graph();
 
 //Shows tab count badge on extension button
 function updateCount(tabId, isOnRemoved) {
   browser.tabs.query({}).then((tabs) => {
     let length = tabs.length;
-
+    
     // onRemoved fires too early and the count is one too many.
     // see https://bugzilla.mozilla.org/show_bug.cgi?id=1396758
     if (
       isOnRemoved &&
       tabId &&
       tabs
-        .map((t) => {
-          return t.id;
-        })
-        .includes(tabId)
-    ) {
-      length--;
-    }
-
-    browser.browserAction.setBadgeText({ text: length.toString() });
-    if (length > 2) {
-      browser.browserAction.setBadgeBackgroundColor({ color: "green" });
-    } else {
-      browser.browserAction.setBadgeBackgroundColor({ color: "red" });
-    }
-  });
-}
-
-
+      .map((t) => {
+        return t.id;
+      })
+      .includes(tabId)
+      ) {
+        length--;
+      }
+      
+      browser.browserAction.setBadgeText({ text: length.toString() });
+      if (length > 2) {
+        browser.browserAction.setBadgeBackgroundColor({ color: "green" });
+      } else {
+        browser.browserAction.setBadgeBackgroundColor({ color: "red" });
+      }
+    });
+  }
+  
+  
 const channel = new BroadcastChannel('GRAPH');
+let graph = new Graph();
 
 channel.onmessage = (msg) => {
-  console.log('Graph request received from popup', msg);
-  channel.postMessage({ graph: graph });
+  channel.postMessage({ msg: graph });
  };
 
 browser.tabs.onRemoved.addListener((tabId) => {
@@ -90,10 +89,8 @@ browser.tabs.onActivated.addListener((activeInfo) => {
 
 browser.tabs.onUpdated.addListener((tabId, changeInfo, tabInfo) => {
   if (changeInfo.url /*&& changeInfo.status === "complete"*/) {
-    console.log(`Tab: ${tabId} URL changed to ${changeInfo.url}. tabInfo.openerTabId = ${tabInfo.openerTabId}, or changeInfo.openerTabId = ${changeInfo.openerTabId}, changeInfo.status = ${changeInfo.status}`);
     const nodeID = graph.addNode("URL", { name: tabInfo.url, url: tabInfo.url });
     urlMap[nodeID] = changeInfo.url;
-    console.log(`urlMap = ${urlMap}`);
   }
 });
 

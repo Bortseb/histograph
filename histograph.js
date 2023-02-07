@@ -1,3 +1,43 @@
+//import {Graph} from "https://wardcunningham.github.io/graph/graph.js"
+class Graph {
+  constructor(nodes = [], rels = []) {
+    this.nodes = nodes;
+    this.rels = rels;
+  }
+
+  addNode(type, props = {}) {
+    const obj = { type, in: [], out: [], props };
+    this.nodes.push(obj);
+    return this.nodes.length - 1;
+  }
+
+  addRel(type, from, to, props = {}) {
+    const obj = { type, from, to, props };
+    this.rels.push(obj);
+    const rid = this.rels.length - 1;
+    this.nodes[from].out.push(rid);
+    this.nodes[to].in.push(rid);
+    return rid;
+  }
+
+  tally() {
+    const tally = (list) =>
+      list.reduce((s, e) => {
+        s[e.type] = s[e.type] ? s[e.type] + 1 : 1;
+        return s;
+      }, {});
+    return { nodes: tally(this.nodes), rels: tally(this.rels) };
+  }
+
+  size() {
+    return this.nodes.length + this.rels.length;
+  }
+  stringify(...args) {
+    const obj = { nodes: this.nodes, rels: this.rels };
+    return JSON.stringify(obj, ...args);
+  }
+}
+
 function download(string, file, mime = "text/json") {
   data = `data:${mime};charset=utf-8,` + encodeURIComponent(string);
   var anchor = document.createElement("a");
@@ -19,38 +59,16 @@ function download(string, file, mime = "text/json") {
 
 const channel = new BroadcastChannel("GRAPH");
 
-let graph = {}
+let graph = new Graph();
+graph.addNode("Test Node");
 
 channel.onmessage = (msg) => {
-  console.log("Graph received from service worker", msg);
-  graph = msg.data.graph;
-  console.log(`The graph is ${graph}`);
-  console.log(`The graph is ${JSON.stringify(graph,null,2) }`);
+  graph = new Graph(msg.data.msg.nodes, msg.data.msg.rels);
+  download(graph.stringify(null, 2), "tabs.graph.json");
 };
 
-
 document.addEventListener("click", (e) => {
-  if (e.target.tagName === "A") {
-    console.log(e);
-  }
   if (e.target.id === "window-to-graph") {
-    /*browser.tabs.query({ currentWindow: true }).then(
-      (tabs) => {
-        const graph = new Graph();
-        for (const tab of tabs) {
-          // tab.url requires the `tabs` permission or a matching host permission.
-          //console.log({...tab});
-          graph.addNode("Tab", { name: tab.title });
-        }
-        console.log(graph, graph.stringify(null, 2));
-        download(graph.stringify(null, 2), "tabs.graph.json");
-      },
-      (error) => {
-        console.error(`Error: ${error}`);
-      }
-      );*/
-      
-    channel.postMessage({ msg: 'Popup requests graph'});
-    download(graph, "tabs.graph.json");
+    channel.postMessage({ msg: "Popup requests graph" });
   }
 });
