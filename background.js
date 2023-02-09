@@ -69,11 +69,24 @@ function updateCount(tabId, isOnRemoved) {
   }
   
   
-const channel = new BroadcastChannel('GRAPH');
+const channel = new BroadcastChannel('histograph');
 let graph = new Graph();
 
 channel.onmessage = (msg) => {
-  channel.postMessage({ msg: graph });
+  console.log("msg:",msg)
+  switch (msg.data.cmd){
+    case "download":
+      channel.postMessage({ cmd: "download", obj: graph });
+      break;
+    case "addNode":
+      console.log("Successful add node msg")
+      //const nodeID = graph.addNode("URL",...msg.data.obj);
+      //urlMap[nodeID] = changeInfo.url;
+      break;
+    default:
+      console.log("No response for the following msg", msg)
+  }
+
  };
 
 browser.tabs.onRemoved.addListener((tabId) => {

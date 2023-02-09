@@ -57,18 +57,27 @@ function download(string, file, mime = "text/json") {
   });*/
 }
 
-const channel = new BroadcastChannel("GRAPH");
+const channel = new BroadcastChannel("histograph");
 
 let graph = new Graph();
 graph.addNode("Test Node");
 
 channel.onmessage = (msg) => {
-  graph = new Graph(msg.data.msg.nodes, msg.data.msg.rels);
-  download(graph.stringify(null, 2), "tabs.graph.json");
+  switch (msg.data.cmd){
+    case "download":
+      graph = new Graph(msg.data.obj.nodes, msg.data.obj.rels);
+      download(graph.stringify(null, 2), "tabs.graph.json");
+      break;
+    case "addNode":
+      console.log("Success, add node in popup)")
+      break;
+    default:
+      console.log("No response for the following msg", msg)
+  }
 };
 
 document.addEventListener("click", (e) => {
   if (e.target.id === "window-to-graph") {
-    channel.postMessage({ msg: "Popup requests graph" });
+    channel.postMessage({ cmd: "download" });
   }
 });
