@@ -63,13 +63,14 @@ let graph = new Graph();
 graph.addNode("Test Node");
 
 channel.onmessage = (msg) => {
+  console.log("Message received in histograph context",msg)
   switch (msg.data.cmd){
-    case "download":
+    case "provide download":
       graph = new Graph(msg.data.obj.nodes, msg.data.obj.rels);
       download(graph.stringify(null, 2), "tabs.graph.json");
       break;
-    case "addNode":
-      console.log("Success, add node in popup)")
+    case "add":
+      console.log("Success, add node in popup from histograph.js)")
       break;
     default:
       console.log("No response for the following msg", msg)
@@ -78,6 +79,7 @@ channel.onmessage = (msg) => {
 
 document.addEventListener("click", (e) => {
   if (e.target.id === "window-to-graph") {
-    channel.postMessage({ cmd: "download" });
+    channel.postMessage({ cmd: "request download" });
   }
+  
 });

@@ -73,13 +73,13 @@ const channel = new BroadcastChannel('histograph');
 let graph = new Graph();
 
 channel.onmessage = (msg) => {
-  console.log("msg:",msg)
+  console.log("Message received in background context",msg)
   switch (msg.data.cmd){
-    case "download":
-      channel.postMessage({ cmd: "download", obj: graph });
+    case "request download":
+      channel.postMessage({ cmd: "provide download", obj: graph });
       break;
-    case "addNode":
-      console.log("Successful add node msg")
+    case "add":
+      console.log("Successful add node msg from background.js")
       //const nodeID = graph.addNode("URL",...msg.data.obj);
       //urlMap[nodeID] = changeInfo.url;
       break;
@@ -108,3 +108,8 @@ browser.tabs.onUpdated.addListener((tabId, changeInfo, tabInfo) => {
 });
 
 updateCount();
+
+
+window.addEventListener("message", (event) => {
+  console.log("The window got", event)
+}, false);
