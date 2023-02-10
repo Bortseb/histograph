@@ -1,6 +1,8 @@
+//import {Graph} from "https://wardcunningham.github.io/graph/graph.js"
+
 let urlMap = [];
-import {Graph} from "https://wardcunningham.github.io/graph/graph.js"
-/*class Graph {
+
+class Graph {
   constructor(nodes = [], rels = []) {
     this.nodes = nodes;
     this.rels = rels;
@@ -37,7 +39,7 @@ import {Graph} from "https://wardcunningham.github.io/graph/graph.js"
     const obj = { nodes: this.nodes, rels: this.rels };
     return JSON.stringify(obj, ...args);
   }
-}*/
+}
 
 function download(string, file, mime = "text/json") {
   data = `data:${mime};charset=utf-8,` + encodeURIComponent(string);
