@@ -5,7 +5,8 @@
     }
   },
   "background": {
-      "scripts": ["background.js"]
+      "scripts": ["background.js"],
+      "background.type": "module"
   },
   "content_scripts": [
     {

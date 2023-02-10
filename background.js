@@ -1,6 +1,6 @@
 let urlMap = [];
-//import {Graph} from "https://wardcunningham.github.io/graph/graph.js"
-class Graph {
+import {Graph} from "https://wardcunningham.github.io/graph/graph.js"
+/*class Graph {
   constructor(nodes = [], rels = []) {
     this.nodes = nodes;
     this.rels = rels;
@@ -37,8 +37,26 @@ class Graph {
     const obj = { nodes: this.nodes, rels: this.rels };
     return JSON.stringify(obj, ...args);
   }
-}
+}*/
 
+function download(string, file, mime = "text/json") {
+  data = `data:${mime};charset=utf-8,` + encodeURIComponent(string);
+  var anchor = document.createElement("a");
+  anchor.setAttribute("href", data);
+  anchor.setAttribute("download", file);
+  document.body.appendChild(anchor); // required for firefox
+  anchor.click();
+  anchor.remove();
+
+  /* Backup download method, requires download api permission
+  window.URL = window.webkitURL || window.URL;
+  file = new Blob([string],{type:'text/json'});
+  browser.downloads.download({
+    url : window.URL.createObjectURL(file),
+    filename : 'test.graph.json',
+    conflictAction : 'uniquify'
+  });*/
+}
 
 //Shows tab count badge on extension button
 function updateCount(tabId, isOnRemoved) {
@@ -69,9 +87,10 @@ function updateCount(tabId, isOnRemoved) {
   }
   
   
-const channel = new BroadcastChannel('histograph');
+//const channel = new BroadcastChannel('histograph');
 let graph = new Graph();
 
+/*
 channel.onmessage = (msg) => {
   console.log("Message received in background context",msg)
   switch (msg.data.cmd){
@@ -88,6 +107,27 @@ channel.onmessage = (msg) => {
   }
 
  };
+ */
+
+ browser.runtime.onMessage.addListener((msg)=>{
+  console.log("Message received in background context",msg)
+  switch (msg.cmd){
+    case "download":
+      download(graph.stringify(null, 2), "tabs.graph.json");
+      //channel.postMessage({ cmd: "provide download", obj: graph });
+      break;
+    case "clear":
+      graph = new Graph();
+      break;
+    case "addNode":
+      console.log("Successful add node msg from background.js")
+      //const nodeID = graph.addNode("URL",...msg.data.obj);
+      //urlMap[nodeID] = changeInfo.url;
+      break;
+    default:
+      console.log("No response for the following msg", msg)
+  }
+ });
 
 browser.tabs.onRemoved.addListener((tabId) => {
   updateCount(tabId, true);
