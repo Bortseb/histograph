@@ -64,72 +64,51 @@ function download(string, file, mime = "text/json") {
 function updateCount(tabId, isOnRemoved) {
   browser.tabs.query({}).then((tabs) => {
     let length = tabs.length;
-    
+
     // onRemoved fires too early and the count is one too many.
     // see https://bugzilla.mozilla.org/show_bug.cgi?id=1396758
     if (
       isOnRemoved &&
       tabId &&
       tabs
-      .map((t) => {
-        return t.id;
-      })
-      .includes(tabId)
-      ) {
-        length--;
-      }
-      
-      browser.browserAction.setBadgeText({ text: length.toString() });
-      if (length > 2) {
-        browser.browserAction.setBadgeBackgroundColor({ color: "green" });
-      } else {
-        browser.browserAction.setBadgeBackgroundColor({ color: "red" });
-      }
-    });
-  }
-  
-  
-//const channel = new BroadcastChannel('histograph');
+        .map((t) => {
+          return t.id;
+        })
+        .includes(tabId)
+    ) {
+      length--;
+    }
+
+    browser.browserAction.setBadgeText({ text: length.toString() });
+    if (length > 2) {
+      browser.browserAction.setBadgeBackgroundColor({ color: "green" });
+    } else {
+      browser.browserAction.setBadgeBackgroundColor({ color: "red" });
+    }
+  });
+}
+
+updateCount();
+
 let graph = new Graph();
 
-/*
-channel.onmessage = (msg) => {
-  console.log("Message received in background context",msg)
-  switch (msg.data.cmd){
-    case "request download":
-      channel.postMessage({ cmd: "provide download", obj: graph });
-      break;
-    case "add":
-      console.log("Successful add node msg from background.js")
-      //const nodeID = graph.addNode("URL",...msg.data.obj);
-      //urlMap[nodeID] = changeInfo.url;
-      break;
-    default:
-      console.log("No response for the following msg", msg)
-  }
-
- };
- */
-
- browser.runtime.onMessage.addListener((msg)=>{
-  console.log("Message received in background context",msg)
-  switch (msg.cmd){
+browser.runtime.onMessage.addListener((msg) => {
+  switch (msg.cmd) {
     case "download":
       download(graph.stringify(null, 2), "tabs.graph.json");
-      //channel.postMessage({ cmd: "provide download", obj: graph });
       break;
     case "clear":
       graph = new Graph();
       break;
-    case "addNode":
-      console.log("Successful add node msg from background.js")
+    case "click":
+      console.log("Click message:" , msg)
       //const nodeID = graph.addNode("URL",...msg.data.obj);
       //urlMap[nodeID] = changeInfo.url;
       break;
     default:
-      console.log("No response for the following msg", msg)
+      console.log("Default case used for (msg) in background.js", msg);
   }
- });
+});
 
 browser.tabs.onRemoved.addListener((tabId) => {
   updateCount(tabId, true);
@@ -139,19 +118,17 @@ browser.tabs.onCreated.addListener((tabId) => {
 });
 
 browser.tabs.onActivated.addListener((activeInfo) => {
-  console.log(`Tab ${activeInfo.tabId} was activated`);
+  console.log(`Tab ${activeInfo.tabId} was activated`, activeInfo);
 });
 
 browser.tabs.onUpdated.addListener((tabId, changeInfo, tabInfo) => {
-  if (changeInfo.url /*&& changeInfo.status === "complete"*/) {
-    const nodeID = graph.addNode("URL", { name: tabInfo.url, url: tabInfo.url });
-    urlMap[nodeID] = changeInfo.url;
+  if (changeInfo.url && changeInfo.status === "complete") {
+    console.log(`Tab # ${tabId} changed: (tabInfo)`,tabInfo)
+    const nodeID = graph.addNode("URL", {
+      name: tabInfo.url,
+      title: tabInfo.title,
+      url: tabInfo.url,
+    });
+    urlMap[nodeID] = tabInfo.url;
   }
 });
-
-updateCount();
-
-
-window.addEventListener("message", (event) => {
-  console.log("The window got", event)
-}, false);
