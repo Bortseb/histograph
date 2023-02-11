@@ -1,6 +1,5 @@
 //import {Graph} from "https://wardcunningham.github.io/graph/graph.js"
-
-let urlMap = [];
+let nids = {}
 
 class Graph {
   constructor(nodes = [], rels = []) {
@@ -99,6 +98,7 @@ browser.runtime.onMessage.addListener((msg) => {
       break;
     case "clear":
       graph = new Graph();
+      nids = {};
       break;
     case "click":
       console.log("Click message:" , msg)
@@ -122,13 +122,25 @@ browser.tabs.onActivated.addListener((activeInfo) => {
 });
 
 browser.tabs.onUpdated.addListener((tabId, changeInfo, tabInfo) => {
-  if (changeInfo.url && changeInfo.status === "complete") {
+  console.log(`Tab ${tabId} changed:`, changeInfo)
+  if (changeInfo.url) {
     console.log(`Tab # ${tabId} changed: (tabInfo)`,tabInfo)
-    const nodeID = graph.addNode("URL", {
-      name: tabInfo.url,
-      title: tabInfo.title,
-      url: tabInfo.url,
-    });
-    urlMap[nodeID] = tabInfo.url;
+    if(!(tabInfo.url in nids)){
+      console.log(`Must record `,tabInfo.url)
+      const nodeID = graph.addNode("URL", {
+        name: tabInfo.url,
+        title: tabInfo.title,
+        url: tabInfo.url,
+      });
+      nids[tabInfo.url] = nodeID;
+    }    
+    else{
+      console.log("Already have",tabInfo.url)
+    }
+  }
+  else{
+    console.log("The URL didn't change?")
   }
 });
+
+ 
