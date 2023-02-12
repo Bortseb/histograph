@@ -1,5 +1,5 @@
 //import {Graph} from "https://wardcunningham.github.io/graph/graph.js"
-let nids = {}
+let nids = {};
 
 class Graph {
   constructor(nodes = [], rels = []) {
@@ -91,6 +91,7 @@ updateCount();
 
 let graph = new Graph();
 
+//Receiving commands from other scripts
 browser.runtime.onMessage.addListener((msg) => {
   switch (msg.cmd) {
     case "download":
@@ -101,7 +102,7 @@ browser.runtime.onMessage.addListener((msg) => {
       nids = {};
       break;
     case "click":
-      console.log("Click message:" , msg)
+      console.log("Click message:", msg);
       //const nodeID = graph.addNode("URL",...msg.data.obj);
       //urlMap[nodeID] = changeInfo.url;
       break;
@@ -122,25 +123,14 @@ browser.tabs.onActivated.addListener((activeInfo) => {
 });
 
 browser.tabs.onUpdated.addListener((tabId, changeInfo, tabInfo) => {
-  console.log(`Tab ${tabId} changed:`, changeInfo)
-  if (changeInfo.url) {
-    console.log(`Tab # ${tabId} changed: (tabInfo)`,tabInfo)
-    if(!(tabInfo.url in nids)){
-      console.log(`Must record `,tabInfo.url)
+  if ("url" in changeInfo) {
+    if (!(tabInfo.url in nids)) {
       const nodeID = graph.addNode("URL", {
         name: tabInfo.url,
         title: tabInfo.title,
         url: tabInfo.url,
       });
       nids[tabInfo.url] = nodeID;
-    }    
-    else{
-      console.log("Already have",tabInfo.url)
     }
   }
-  else{
-    console.log("The URL didn't change?")
-  }
 });
-
- 
