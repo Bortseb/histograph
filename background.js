@@ -1,5 +1,6 @@
 //import {Graph} from "https://wardcunningham.github.io/graph/graph.js"
 let nids = {};
+let activeTab = "";
 
 class Graph {
   constructor(nodes = [], rels = []) {
