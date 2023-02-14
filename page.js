@@ -1,3 +1,5 @@
+const windowLocation = '' + window.location;
+
 //Add every link that is clicked on as a new node
 window.addEventListener("click", (e) => {
   //console.log("page.js click event",e)
@@ -7,7 +9,7 @@ window.addEventListener("click", (e) => {
   if (e.ctrlKey) {
     browser.runtime.sendMessage({
       cmd: "click",
-      curURL: window.location,
+      curURL: windowLocation,
       curTitle: document.title,
       clickedURL: e.target.href,
       type: "new tab",
@@ -15,17 +17,17 @@ window.addEventListener("click", (e) => {
   } else {
     browser.runtime.sendMessage({
       cmd: "click",
-      curURL: window.location,
+      curURL: windowLocation,
       curTitle: document.title,
       clickedURL: e.target.href,
       type: "same tab",
     });
   }
 });
-
+/*
 window.addEventListener("auxclick", (e) => {
   //console.log("page.js auxclick event",e)
-  //console.log(`cmd: "click", curURL: window.location, curTitle: document.title, clickedURL: e.target.href `)
+  //console.log(`cmd: "click", curURL: windowLocation, curTitle: document.title, clickedURL: e.target.href `)
   if (!e.target.closest("a")) {
     return;
   }
@@ -33,7 +35,7 @@ window.addEventListener("auxclick", (e) => {
   if (e.button === 1) {
     browser.runtime.sendMessage({
       cmd: "click",
-      curURL: window.location,
+      curURL: windowLocation,
       curTitle: document.title,
       clickedURL: e.target.href,
       type: "new tab",
@@ -41,3 +43,4 @@ window.addEventListener("auxclick", (e) => {
   }
   //browser.runtime.sendMessage({ cmd: "click", curURL: "window.location", curTitle: document.title, clickedURL: e.target.href });
 });
+*/
