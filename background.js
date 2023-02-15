@@ -3,6 +3,7 @@ let nids = {};
 let rels = {};
 let activeTab = "";
 let openedBy = {};
+let tabURL = {};
 
 class Graph {
   constructor(nodes = [], rels = []) {
@@ -122,7 +123,7 @@ browser.runtime.onMessage.addListener((msg) => {
       addClick(source, target, msg.type);
       break;
     case "log":
-      console.log ("Logged event:", msg.event)
+      console.log("Logged event:", msg.event);
     default:
       console.log("Default case used for (msg) in background.js", msg);
   }
@@ -133,13 +134,16 @@ browser.tabs.onRemoved.addListener((tabId) => {
 });
 
 browser.tabs.onCreated.addListener(async (e) => {
-  console.log("New tab created, (e)", e)
+  console.log("New tab created, (e)", e);
   updateCount(e, false);
-  if("openerTabId" in e){
+  if ("openerTabId" in e) {
     const openerTab = await browser.tabs.get(e.openerTabId);
     const openerURL = openerTab.url;
     openedBy[e.id] = { url: openerURL, id: e.openerTabId };
+  } else {
+    addURL(e.url);
   }
+  tabURL[e.id] = e.url;
 });
 
 browser.tabs.onActivated.addListener((activeInfo) => {
@@ -155,6 +159,13 @@ browser.tabs.onUpdated.addListener((tabId, changeInfo, tabInfo) => {
       const source = addURL(openedBy[tabId].url);
       addClick(source, target, "new tab");
       delete openedBy[tabId];
+    } else {
+      const source = addURL(tabURL[tabId]);
+      console.log("I think im adding source", source)
+      addClick(tabId, target, "same tab");
+      tabURL[tabId] = target
     }
+
+
   }
 });
