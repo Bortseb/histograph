@@ -1,40 +1,28 @@
-const windowLocation = '' + window.location;
+const windowLocation = "" + window.location;
 //const tabID = browser.tabs.getCurrent()
 
 //Add every link that is clicked on as a new node
 window.addEventListener("click", (e) => {
-  console.log("page.js click event",e)
   if (!e.target.closest("a")) {
-    console.log ("no link clicked")
+    console.log("no link clicked");
     return;
   }
-  console.log ("link clicked")
-  if (!(e.ctrlKey)) {
+
+  const linkCLicked = e.target.closest("a").href;
+  //console.log("link clicked",linkCLicked );
+  if (!e.ctrlKey) {
     browser.runtime.sendMessage({
       cmd: "click",
       source: windowLocation,
-      target: e.target.href,
+      target: linkCLicked,
       type: "same tab",
     });
   }
 });
+
 /*
 window.addEventListener("auxclick", (e) => {
-  //console.log("page.js auxclick event",e)
-  //console.log(`cmd: "click", curURL: windowLocation, curTitle: document.title, clickedURL: e.target.href `)
-  if (!e.target.closest("a")) {
-    return;
-  }
-  //middle click to open new tab
-  if (e.button === 1) {
-    browser.runtime.sendMessage({
-      cmd: "click",
-      curURL: windowLocation,
-      curTitle: document.title,
-      clickedURL: e.target.href,
-      type: "new tab",
-    });
-  }
-  //browser.runtime.sendMessage({ cmd: "click", curURL: "window.location", curTitle: document.title, clickedURL: e.target.href });
+  console.log("Aux event", e)
+  console.log("Link clicked is",e.target.closest("a").href)
 });
 */

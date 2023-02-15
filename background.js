@@ -121,6 +121,8 @@ browser.runtime.onMessage.addListener((msg) => {
       const target = addURL(msg.target);
       addClick(source, target, msg.type);
       break;
+    case "log":
+      console.log ("Logged event:", msg.event)
     default:
       console.log("Default case used for (msg) in background.js", msg);
   }
