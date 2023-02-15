@@ -108,7 +108,7 @@ updateCount();
 let graph = new Graph();
 
 //Receiving commands from other scripts
-browser.runtime.onMessage.addListener((msg) => {
+browser.runtime.onMessage.addListener((msg, sender) => {
   switch (msg.cmd) {
     case "download":
       download(graph.stringify(null, 2), `tabs ${Date.now()}.graph.json`);
@@ -121,6 +121,7 @@ browser.runtime.onMessage.addListener((msg) => {
       const source = addURL(msg.source);
       const target = addURL(msg.target);
       addClick(source, target, msg.type);
+      tabURL[sender.tab.id] =  target
       break;
     case "log":
       console.log("Logged event:", msg.event);
