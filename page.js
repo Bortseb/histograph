@@ -1,25 +1,19 @@
 const windowLocation = '' + window.location;
+//const tabID = browser.tabs.getCurrent()
 
 //Add every link that is clicked on as a new node
 window.addEventListener("click", (e) => {
-  //console.log("page.js click event",e)
+  console.log("page.js click event",e)
   if (!e.target.closest("a")) {
+    console.log ("no link clicked")
     return;
   }
-  if (e.ctrlKey) {
+  console.log ("link clicked")
+  if (!(e.ctrlKey)) {
     browser.runtime.sendMessage({
       cmd: "click",
-      curURL: windowLocation,
-      curTitle: document.title,
-      clickedURL: e.target.href,
-      type: "new tab",
-    });
-  } else {
-    browser.runtime.sendMessage({
-      cmd: "click",
-      curURL: windowLocation,
-      curTitle: document.title,
-      clickedURL: e.target.href,
+      source: windowLocation,
+      target: e.target.href,
       type: "same tab",
     });
   }

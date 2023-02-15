@@ -1,5 +1,6 @@
 //import {Graph} from "https://wardcunningham.github.io/graph/graph.js"
 let nids = {};
+let rels = {};
 let activeTab = "";
 let openedBy = {};
 
@@ -40,6 +41,18 @@ class Graph {
     const obj = { nodes: this.nodes, rels: this.rels };
     return JSON.stringify(obj, ...args);
   }
+}
+
+function addURL(url) {
+  if (url in nids) {
+    return nids[url];
+  } else {
+    return (nids[url] = graph.addNode("URL", { name: url, url: url }));
+  }
+}
+
+function addClick(source, target, type) {
+  return (rels[target] = graph.addRel(`${type}`, source, target));
 }
 
 function download(string, file, mime = "text/json") {
@@ -97,16 +110,16 @@ let graph = new Graph();
 browser.runtime.onMessage.addListener((msg) => {
   switch (msg.cmd) {
     case "download":
-      download(graph.stringify(null, 2), "tabs.graph.json");
+      download(graph.stringify(null, 2), `tabs ${Date.now()}.graph.json`);
       break;
     case "clear":
       graph = new Graph();
       nids = {};
       break;
     case "click":
-      console.log("Click message:", msg);
-      //const nodeID = graph.addNode("URL",...msg.data.obj);
-      //urlMap[nodeID] = changeInfo.url;
+      const source = addURL(msg.source);
+      const target = addURL(msg.target);
+      addClick(source, target, msg.type);
       break;
     default:
       console.log("Default case used for (msg) in background.js", msg);
@@ -116,16 +129,15 @@ browser.runtime.onMessage.addListener((msg) => {
 browser.tabs.onRemoved.addListener((tabId) => {
   updateCount(tabId, true);
 });
+
 browser.tabs.onCreated.addListener(async (e) => {
+  console.log("New tab created, (e)", e)
   updateCount(e, false);
-  console.log("Here is the event on a new tab created", e);
-  console.log(`Tab#${e.id} was opened by tab#${e.openerTabId} `);
-  const openerTab = await browser.tabs.get(e.openerTabId)
-  const openerURL = openerTab.url
-  console.log("openerTab = ",openerTab)
-  //browser.tabs.query({id:e.openerTabId }).then((tab)=>{const openerURL = tab.id});
-  openedBy[e.id] = { openerTabId: e.openerTabId, openerURL: openerURL };
-  console.log("The new obj item is", openedBy[e.id]);
+  if("openerTabId" in e){
+    const openerTab = await browser.tabs.get(e.openerTabId);
+    const openerURL = openerTab.url;
+    openedBy[e.id] = { url: openerURL, id: e.openerTabId };
+  }
 });
 
 browser.tabs.onActivated.addListener((activeInfo) => {
@@ -134,26 +146,12 @@ browser.tabs.onActivated.addListener((activeInfo) => {
 
 browser.tabs.onUpdated.addListener((tabId, changeInfo, tabInfo) => {
   console.log("Tab updated: (changeInfo)", changeInfo);
-  if ("url" in changeInfo) {
-    if (!(tabInfo.url in nids)) {
-      const nodeID = graph.addNode("URL", {
-        name: tabInfo.url,
-        title: tabInfo.title,
-        url: tabInfo.url,
-      });
-      nids[tabInfo.url] = nodeID;
-    }
+  if ("status" in changeInfo && changeInfo.status === "complete") {
+    const target = addURL(tabInfo.url);
 
     if (tabId in openedBy) {
-      console.log("url of linker",openedBy[tabId].openerURL)
-      const nodeID = graph.addRel(
-        "new tab",
-        nids[tabInfo.url],
-        nids[openedBy[tabId].openerURL],
-        {
-          name: "opened in new tab by",
-        }
-      );
+      const source = addURL(openedBy[tabId].url);
+      addClick(source, target, "new tab");
       delete openedBy[tabId];
     }
   }
