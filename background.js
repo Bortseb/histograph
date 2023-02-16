@@ -52,8 +52,8 @@ function addURL(url) {
   }
 }
 
-function addClick(source, target, type) {
-  return (rels[target] = graph.addRel(`${type}`, source, target));
+function addClick(source, target, type, props) {
+  return (rels[target] = graph.addRel(`${type}`, source, target, props));
 }
 
 function download(string, file, mime = "text/json") {
@@ -120,7 +120,7 @@ browser.runtime.onMessage.addListener((msg, sender) => {
     case "click":
       const source = addURL(msg.source);
       const target = addURL(msg.target);
-      addClick(source, target, msg.type);
+      addClick(source, target, msg.type, {which: "click on page"});
       tabURL[sender.tab.id] =  target
       break;
     case "log":
