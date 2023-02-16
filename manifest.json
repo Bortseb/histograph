@@ -25,7 +25,7 @@
   "name": "histograph",
   "permissions": [
     "tabs",
-    "history"
+    "webNavigation"
   ],
   "version": "1.0"
 }
