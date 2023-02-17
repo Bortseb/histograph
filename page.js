@@ -2,7 +2,7 @@ const windowLocation = "" + window.location;
 //const tabID = browser.tabs.getCurrent()
 
 //Add every link that is clicked on as a new node
-window.addEventListener("click", (e) => {
+/*window.addEventListener("click", (e) => {
   if (!e.target.closest("a")) {
     console.log("no link clicked");
     return;
@@ -19,6 +19,7 @@ window.addEventListener("click", (e) => {
     });
   }
 });
+*/
 
 /*
 window.addEventListener("auxclick", (e) => {
