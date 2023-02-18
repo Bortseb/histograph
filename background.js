@@ -120,8 +120,8 @@ browser.runtime.onMessage.addListener((msg, sender) => {
     case "click":
       const source = addURL(msg.source);
       const target = addURL(msg.target);
-      addClick(source, target, msg.type, {which: "click on page"});
-      tabURL[sender.tab.id] =  target
+      addClick(source, target, msg.type, { which: "click on page" });
+      tabURL[sender.tab.id] = target;
       break;
     case "log":
       console.log("Logged event:", msg.event);
@@ -162,11 +162,9 @@ browser.tabs.onUpdated.addListener((tabId, changeInfo, tabInfo) => {
       delete openedBy[tabId];
     } else {
       const source = addURL(tabURL[tabId]);
-      console.log("I think im adding source", source)
+      console.log("I think im adding source", source);
       addClick(tabId, target, "same tab");
-      tabURL[tabId] = target
+      tabURL[tabId] = target;
     }
-
-
   }
 });

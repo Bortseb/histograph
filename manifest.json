@@ -17,7 +17,7 @@
   "browser_action": {
     "browser_style": true,
     "default_title": "histograph",
-    "default_popup": "histograph.html"
+    "default_popup": "popup.html"
   },
   "description": "Visualize and export your browsing history as a graph.",
   "homepage_url": "https://github.com/Bortseb/histograph",
