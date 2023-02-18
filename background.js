@@ -135,8 +135,8 @@ browser.tabs.onRemoved.addListener((tabId) => {
 });
 
 browser.tabs.onCreated.addListener(async (e) => {
-  console.log("New tab created, (e)", e);
   updateCount(e, false);
+  /*console.log("New tab created, (e)", e);
   if ("openerTabId" in e) {
     const openerTab = await browser.tabs.get(e.openerTabId);
     const openerURL = openerTab.url;
@@ -145,8 +145,10 @@ browser.tabs.onCreated.addListener(async (e) => {
     addURL(e.url);
   }
   tabURL[e.id] = e.url;
+  */
 });
 
+/*
 browser.tabs.onActivated.addListener((activeInfo) => {
   console.log(`Tab ${activeInfo.tabId} was activated`, activeInfo);
 });
@@ -157,14 +159,24 @@ browser.tabs.onUpdated.addListener((tabId, changeInfo, tabInfo) => {
     const target = addURL(tabInfo.url);
 
     if (tabId in openedBy) {
+      //new tab opened by other tab
       const source = addURL(openedBy[tabId].url);
       addClick(source, target, "new tab");
       delete openedBy[tabId];
     } else {
+      //new tab opened without opener, or URL changed in existing tab
       const source = addURL(tabURL[tabId]);
       console.log("I think im adding source", source);
       addClick(tabId, target, "same tab");
       tabURL[tabId] = target;
     }
   }
+});
+*/
+
+browser.webNavigation.onCommitted.addListener((event) => {
+  console.log("onCommitted:", event.transitionType, event.transitionQualifiers)
+});
+browser.webNavigation.onCompleted.addListener((event) => {
+  console.log("onCompleted:", event)
 });
