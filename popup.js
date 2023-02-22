@@ -6,6 +6,9 @@ document.addEventListener("click", (e) => {
     case "clear-history":
       browser.runtime.sendMessage({ cmd: "clear" });
       break;
+    case "switch":
+        browser.runtime.sendMessage({ cmd: "change tab" });
+        break;
     default:
       console.log("default case worked in histograph.js");
   }

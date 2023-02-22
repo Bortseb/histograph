@@ -4,6 +4,7 @@ let rels = {};
 let activeTab = "";
 let openedBy = {};
 let tabURL = {};
+let tabData = {};
 
 class Graph {
   constructor(nodes = [], rels = []) {
@@ -43,6 +44,8 @@ class Graph {
     return JSON.stringify(obj, ...args);
   }
 }
+
+let graph = new Graph();
 
 function addURL(url) {
   if (url in nids) {
@@ -105,8 +108,6 @@ function updateCount(tabId, isOnRemoved) {
 
 updateCount();
 
-let graph = new Graph();
-
 //Receiving commands from other scripts
 browser.runtime.onMessage.addListener((msg, sender) => {
   switch (msg.cmd) {
@@ -116,6 +117,7 @@ browser.runtime.onMessage.addListener((msg, sender) => {
     case "clear":
       graph = new Graph();
       nids = {};
+      tabData = {};
       break;
     case "click":
       const source = addURL(msg.source);
@@ -123,19 +125,21 @@ browser.runtime.onMessage.addListener((msg, sender) => {
       addClick(source, target, msg.type, { which: "click on page" });
       tabURL[sender.tab.id] = target;
       break;
+    case "change tab": //currently changes to tab#3, but in the future, use this to change to arbitrary tabID
+      browser.tabs.update(3, { active: true });
+      break;
     case "log":
       console.log("Logged event:", msg.event);
     default:
       console.log("Default case used for (msg) in background.js", msg);
   }
 });
-
 browser.tabs.onRemoved.addListener((tabId) => {
   updateCount(tabId, true);
 });
-
 browser.tabs.onCreated.addListener(async (e) => {
   updateCount(e, false);
+  console.log("tabs.onCreated", e);
   /*console.log("New tab created, (e)", e);
   if ("openerTabId" in e) {
     const openerTab = await browser.tabs.get(e.openerTabId);
@@ -147,14 +151,26 @@ browser.tabs.onCreated.addListener(async (e) => {
   tabURL[e.id] = e.url;
   */
 });
-
-/*
 browser.tabs.onActivated.addListener((activeInfo) => {
-  console.log(`Tab ${activeInfo.tabId} was activated`, activeInfo);
+  console.log("tabs.onActivated", activeInfo);
 });
-
 browser.tabs.onUpdated.addListener((tabId, changeInfo, tabInfo) => {
-  console.log("Tab updated: (changeInfo)", changeInfo);
+  console.log("tabs.onUpdated (changeInfo, tabInfo)", changeInfo, tabInfo);
+
+  //Tab is starting to load something else after last complete status
+  if (
+    tabData[tabId].status === "complete" &&
+    "status" in changeInfo &&
+    changeInfo.status === "loading"
+  ) {
+    const nid = addURL(tabData[tabId].url);
+    graph.nodes[nid].props["foo"] = "bar";
+    tabData[tabId] = tabInfo;
+  } else {
+    tabData[tabId] = tabInfo;
+  }
+
+  /*
   if ("status" in changeInfo && changeInfo.status === "complete") {
     const target = addURL(tabInfo.url);
 
@@ -171,12 +187,18 @@ browser.tabs.onUpdated.addListener((tabId, changeInfo, tabInfo) => {
       tabURL[tabId] = target;
     }
   }
+  */
 });
-*/
-
 browser.webNavigation.onCommitted.addListener((event) => {
-  console.log("onCommitted:", event.transitionType, event.transitionQualifiers)
+  console.log(
+    "webNavigation.onCommitted:",
+    event /*.transitionType, event.transitionQualifiers*/
+  );
 });
+
 browser.webNavigation.onCompleted.addListener((event) => {
-  console.log("onCompleted:", event)
+  console.log(
+    "webNavigation.onCompleted:",
+    event /*.transitionType, event.transitionQualifiers*/
+  );
 });

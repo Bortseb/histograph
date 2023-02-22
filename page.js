@@ -2,12 +2,12 @@ const windowLocation = "" + window.location;
 //const tabID = browser.tabs.getCurrent()
 
 //Add every link that is clicked on as a new node
-/*window.addEventListener("click", (e) => {
+window.addEventListener("click", (e) => {
   if (!e.target.closest("a")) {
-    console.log("no link clicked");
+    console.log("no link clicked (e)",e);
     return;
   }
-
+/*
   const linkCLicked = e.target.closest("a").href;
   //console.log("link clicked",linkCLicked );
   if (!e.ctrlKey) {
@@ -18,8 +18,9 @@ const windowLocation = "" + window.location;
       type: "same tab",
     });
   }
+  */
 });
-*/
+
 
 /*
 window.addEventListener("auxclick", (e) => {
