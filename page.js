@@ -1,10 +1,9 @@
 const windowLocation = "" + window.location;
-const tabID = browser.tabs.getCurrent();
 
 //Add every link that is clicked on as a new node
 window.addEventListener("click", (e) => {
   if (!e.target.closest("a")) {
-    //console.log("no link clicked (e)", e);
+    console.log("no link clicked (e)", e);
     return;
   }
   const linkCLicked = e.target.closest("a").href;
@@ -13,16 +12,14 @@ window.addEventListener("click", (e) => {
       cmd: "click",
       source: windowLocation,
       target: linkCLicked,
-      type: "new",
-      tabID: tabID,
+      type: "new tab",
     });
   } else {
     browser.runtime.sendMessage({
       cmd: "click",
       source: windowLocation,
       target: linkCLicked,
-      type: "same",
-      tabID: tabID,
+      type: "same tab",
     });
   }
 });
@@ -37,7 +34,6 @@ window.addEventListener("auxclick", (e) => {
     cmd: "click",
     source: windowLocation,
     target: linkCLicked,
-    type: "new",
-    tabID: tabID,
+    type: "new tab",
   });
 });
