@@ -134,9 +134,11 @@ browser.runtime.onMessage.addListener((msg, sender) => {
       console.log("Default case used for (msg) in background.js", msg);
   }
 });
+
 browser.tabs.onRemoved.addListener((tabId) => {
   updateCount(tabId, true);
 });
+
 browser.tabs.onCreated.addListener(async (e) => {
   updateCount(e, false);
   console.log("tabs.onCreated", e);
@@ -151,13 +153,17 @@ browser.tabs.onCreated.addListener(async (e) => {
   tabURL[e.id] = e.url;
   */
 });
+
 browser.tabs.onActivated.addListener((activeInfo) => {
   console.log("tabs.onActivated", activeInfo);
+  console.log({activeInfo})
 });
+
 browser.tabs.onUpdated.addListener((tabId, changeInfo, tabInfo) => {
   console.log("tabs.onUpdated (changeInfo, tabInfo)", changeInfo, tabInfo);
 
   //Tab is starting to load something else after last complete status
+  /*
   if (
     tabData[tabId].status === "complete" &&
     "status" in changeInfo &&
@@ -169,6 +175,7 @@ browser.tabs.onUpdated.addListener((tabId, changeInfo, tabInfo) => {
   } else {
     tabData[tabId] = tabInfo;
   }
+  */
 
   /*
   if ("status" in changeInfo && changeInfo.status === "complete") {
@@ -189,6 +196,7 @@ browser.tabs.onUpdated.addListener((tabId, changeInfo, tabInfo) => {
   }
   */
 });
+
 browser.webNavigation.onCommitted.addListener((event) => {
   console.log(
     "webNavigation.onCommitted:",
