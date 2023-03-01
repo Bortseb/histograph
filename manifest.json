@@ -5,8 +5,7 @@
     }
   },
   "background": {
-      "page": "background.html",
-      "persistent": true
+      "page": "background.html"
   },
   "content_scripts": [
     {

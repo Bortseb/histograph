@@ -1,5 +1,5 @@
 'use strict';
-
+console.log("graph.js worked")
 import * as cypher from './cypher.js'
 
 const uniq = (value, index, self) => self.indexOf(value) === index

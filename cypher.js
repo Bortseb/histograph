@@ -1,4 +1,4 @@
-
+console.log("cypher.js worked")
 export function parse(text, log=()=>{}) {
   const r = {}, x = {}               // rules defined and traced
   let left = '', right = text      // text parsed and pending
