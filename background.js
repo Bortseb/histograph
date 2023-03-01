@@ -28,8 +28,8 @@ function addLink(source, target, type, props) {
 }
 
 function download(string, file, mime = "text/json") {
-  data = `data:${mime};charset=utf-8,` + encodeURIComponent(string);
-  var anchor = document.createElement("a");
+  let data = `data:${mime};charset=utf-8,` + encodeURIComponent(string);
+  let anchor = document.createElement("a");
   anchor.setAttribute("href", data);
   anchor.setAttribute("download", file);
   document.body.appendChild(anchor); // required for firefox
@@ -80,7 +80,7 @@ updateCount();
 browser.runtime.onMessage.addListener((msg, sender) => {
   switch (msg.cmd) {
     case "download":
-      console.log ("trying to DL")
+      console.log ("trying to DL", graph,graph.stringify(null, 2) )
       download(graph.stringify(null, 2), `tabs ${Date.now()}.graph.json`);
       break;
     case "clear":
