@@ -1,4 +1,4 @@
-console.log("display.js worked")
+console.log("display.js import worked")
 
 let drawing = false
 let panSVG = null

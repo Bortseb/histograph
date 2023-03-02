@@ -1,3 +1,4 @@
+console.log("collaborator.js import worked")
 import { Graph } from "./graph.js";
 import { display } from "./display.js";
 

@@ -1,5 +1,6 @@
+//from 'https://wardcunningham.github.io/graph/graph.js'
 'use strict';
-console.log("graph.js worked")
+console.log("graph.js import worked")
 import * as cypher from './cypher.js'
 
 const uniq = (value, index, self) => self.indexOf(value) === index
