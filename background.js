@@ -1,11 +1,13 @@
 import { Graph } from "./graph.js";
-import { composite } from "./composite.js";
-import { dotify } from "./dotify.js";
-import { hoverbold } from "./hoverbold.js";
-import * as indexMin from "./index.min.js";
-let hpccWasm = window["@hpcc-js/wasm"];
-import * as svgPanZoom from "./svg-pan-zoom.min.js";
-import { display } from "./display.js";
+let graph = new Graph();
+browser.storage.local.get("graph").then(
+  (data) => {
+    console.log("stored data", data.graph);
+  },
+  (err) => {
+    console.log(err);
+  }
+);
 
 let nids = {};
 let rels = {};
@@ -13,7 +15,6 @@ let activeTab = "";
 let openedBy = {};
 let tabURL = {};
 let tabData = {};
-let graph = new Graph();
 
 function addURL(url) {
   if (url in nids) {
@@ -80,11 +81,19 @@ updateCount();
 browser.runtime.onMessage.addListener((msg, sender) => {
   switch (msg.cmd) {
     case "download":
-      console.log ("trying to DL", graph,graph.stringify(null, 2) )
+      console.log("trying to DL", graph, graph.stringify(null, 2));
       download(graph.stringify(null, 2), `tabs ${Date.now()}.graph.json`);
       break;
     case "clear":
       graph = new Graph();
+      browser.storage.local.clear().then(
+        () => {
+          console.log("OK");
+        },
+        (e) => {
+          console.log(e);
+        }
+      );
       nids = {};
       tabData = {};
       break;
@@ -133,6 +142,9 @@ browser.tabs.onUpdated.addListener((tabId, changeInfo, tabInfo) => {
 
   if ("url" in changeInfo) {
     addURL(changeInfo.url);
+    browser.storage.local.set({
+      graph: graph,
+    });
   }
   //Tab is starting to load something else after last complete status
   /*
@@ -183,22 +195,5 @@ browser.webNavigation.onCompleted.addListener((event) => {
   );
 });
 
-let beam = [{ name: "graph", graph: graph }];
 
-const target = document.querySelector("#target");
-/*
-window.over = function (event) {
-event.preventDefault()
-}
-
-window.drop = async function (event) {
-event.preventDefault();
-beam.push(
-  ...await dropl(event, '.jsonl'),
-  ...await drop(event, '.graph.json')
-)
-display(beam,target)
-}
-*/
-
-display(beam, target);
+//TODO, make all event listeners here modify the graph in some way, assuming this will be non-persistent soon. Persistent : false will be added to the background in manaifest once this is done.

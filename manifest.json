@@ -5,7 +5,8 @@
     }
   },
   "background": {
-      "page": "background.html"
+      "page": "background.html",
+      "persistent": false
   },
   "content_scripts": [
     {
@@ -25,7 +26,9 @@
   "name": "histograph",
   "permissions": [
     "tabs",
-    "webNavigation"
+    "webNavigation",
+    "storage",
+    "unlimitedStorage"
   ],
   "version": "1.0"
 }
