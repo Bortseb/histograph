@@ -1,5 +1,6 @@
 // render graph as dot input to graphviz
-console.log("dotify.js worked")
+//from https://github.com/WardCunningham/graph/blob/main/docs/collaborator/dotify.js
+console.log("dotify.js import worked")
 export function dotify(complex) {
   const {graph, merged} = complex
   const tip = props => Object.entries(props).filter(e => e[1]).map(e => `${e[0]}: ${e[1]}`).join("\\n")

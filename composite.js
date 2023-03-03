@@ -1,5 +1,6 @@
 // aggregate multiple graphs into a single graph
-console.log("composite.js worked")
+//from https://github.com/WardCunningham/graph/blob/main/docs/collaborator/composite.js
+console.log("composite.js import worked")
 import {Graph} from './graph.js'
 
 const uniq = (value, index, self) => self.indexOf(value) === index

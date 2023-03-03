@@ -1,5 +1,6 @@
 // embolden lines from graphviz svg nodes on hover
-console.log("hoverbold.js worked")
+// from https://github.com/WardCunningham/graph/blob/main/docs/collaborator/hoverbold.js
+console.log("hoverbold.js import worked")
 export function hoverbold(div,select='both') {
   let rels = [] // [[edge, from, to], ...]
   const title = target => target.querySelector('title').textContent.replace(/\\n/g,' ')
