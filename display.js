@@ -10,6 +10,7 @@ import {dotify} from './dotify.js'
 import {hoverbold} from './hoverbold.js'
 
 export async function display(chosen,target) {
+  console.log("display function was called")
   let targetsvg = null
 
   if(!drawing){

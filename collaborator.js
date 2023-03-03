@@ -4,7 +4,7 @@ import { display } from "./display.js";
 
 export let hpccWasm = window["@hpcc-js/wasm"]; 
 let graph = browser.runtime.getBackgroundPage().graph
-console.log("collaborator.js was run")
+console.log("collaborator.js was run",graph)
 
 let beam = [{ name: "graph", graph: graph }]; //This might work, but I don't think this script knows what graph is? use local storage for graph passing?
 
