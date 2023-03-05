@@ -3,25 +3,22 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%229 0%22>🔵</text></svg>">
-    <script src="./index.min.js"></script>
-    <script src="./svg-pan-zoom.min.js"></script>
+    <script src="./popup.js"></script>
+    <link href="./popup.css" rel="stylesheet" />
     <script type="module" src="./collaborator.js"></script>
-
-    <script src="popup.js"></script>
-    <style>
-      a {
-        margin: 10px;
-        display: inline-block;
-      }
-    </style>
+    <script src="./hpcc-js-wasm-1-20-1-index.min.js"></script>
+    <script src="./dash14-svg-pan-zoom.min.js"></script>
   </head>
 
   <body>
     <a href="#" id="download-history">Download history as graph.json</a>
     <a href="#" id="clear-history">Clear history</a>
     <a href="#" id="switch">Switch Tab</a>
-    <div id="target"></div>
-    <!--<div id="target" ondrop="drop(event)" ondragover="over(event)" ondragenter="over(event)"></div>-->
+    <div
+      id="target"
+      ondrop="drop(event)"
+      ondragover="over(event)"
+      ondragenter="over(event)"
+    ></div>
   </body>
 </html>

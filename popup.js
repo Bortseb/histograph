@@ -7,8 +7,8 @@ document.addEventListener("click", (e) => {
       browser.runtime.sendMessage({ cmd: "clear" });
       break;
     case "switch":
-        browser.runtime.sendMessage({ cmd: "change tab" });
-        break;
+      browser.runtime.sendMessage({ cmd: "change tab" });
+      break;
     default:
       console.log("default case worked in histograph.js");
   }

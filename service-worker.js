@@ -1,5 +1,5 @@
-// move to using idb promised for graph persistence, then remove anything that isn't directly related to responding to events
 import { Graph } from "./graph.js";
+// move to using idb promised for graph persistence, then remove anything that isn't directly related to responding to events
 let graph = new Graph();
 browser.storage.local.get("graph").then(
   (data) => {
