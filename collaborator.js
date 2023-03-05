@@ -1,8 +1,9 @@
-import {Graph} from './graph.js'
-import {drop,dropl,dropu} from './drop.js'
-import {display} from './display.js'
+import { Graph } from "./graph.js";
+import { drop, dropl, dropu } from "./drop.js";
+export let hpccWasm = window["@hpcc-js/wasm"];
+import { display } from "./display.js";
 
-console.log("collaborator.js import worked")
+console.log("collaborator.js import worked");
 
 // const beam = await fetch('./SituatedInstitutions.jsonl')
 //   .then(req => req.text())
@@ -12,26 +13,28 @@ console.log("collaborator.js import worked")
 //     .map(({name,graph}) => ({name,graph:new Graph(graph.nodes, graph.rels)})))
 // console.log({beam})
 
-let beam = await fetch('./robert.graph.json')
-  .then(req => req.json())
-  .then(json => [{name:'robert',graph:new Graph(json.nodes,json.rels)}])
+let beam = await fetch("./robert.graph.json")
+  .then((req) => req.json())
+  .then((json) => [
+    { name: "robert", graph: new Graph(json.nodes, json.rels) },
+  ]);
 
-const target = document.querySelector('#target')
+const target = document.querySelector("#target");
 
 window.over = function (event) {
-  event.preventDefault()
-}
+  event.preventDefault();
+};
 
 window.drop = async function (event) {
   event.preventDefault();
   beam.push(
-    ...await dropl(event, '.jsonl'),
-    ...await drop(event, '.graph.json')
-  )
-  display(beam,target)
-}
+    ...(await dropl(event, ".jsonl")),
+    ...(await drop(event, ".graph.json"))
+  );
+  display(beam, target);
+};
 
-display(beam,target)
+display(beam, target);
 
 /* first attempt to over simplify
 import { Graph } from "./graph.js";

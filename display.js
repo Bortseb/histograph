@@ -8,6 +8,7 @@ const panZoom = {}
 import {composite} from './composite.js'
 import {dotify} from './dotify.js'
 import {hoverbold} from './hoverbold.js'
+let hpccWasm = window["@hpcc-js/wasm"];
 
 export async function display(chosen,target) {
   console.log("display function was called")
