@@ -31,9 +31,6 @@ window.drop = async function (event) {
 
 display(beam,target)
 
-
-
-
 /* first attempt to over simplify
 import { Graph } from "./graph.js";
 import { display } from "./display.js";
@@ -42,6 +39,4 @@ let graph = browser.runtime.getBackgroundPage().graph;
 console.log("collaborator.js was run");
 //This might work, but I don't think this script knows what graph is? use local storage for graph passing?
 let beam = [{ name: "graph", graph: graph }];
-const target = document.querySelector("#target");
-display(beam, target);
-*/
+

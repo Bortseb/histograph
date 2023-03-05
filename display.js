@@ -1,4 +1,5 @@
-console.log("display.js worked")
+//from https://github.com/WardCunningham/graph/blob/main/docs/collaborator/display.js
+console.log("display.js import worked")
 
 let drawing = false
 let panSVG = null
@@ -7,10 +8,9 @@ const panZoom = {}
 import {composite} from './composite.js'
 import {dotify} from './dotify.js'
 import {hoverbold} from './hoverbold.js'
-let hpccWasm = window["@hpcc-js/wasm"];
-
 
 export async function display(chosen,target) {
+  console.log("display function was called")
   let targetsvg = null
 
   if(!drawing){

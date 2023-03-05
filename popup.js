@@ -10,6 +10,6 @@ document.addEventListener("click", (e) => {
       browser.runtime.sendMessage({ cmd: "change tab" });
       break;
     default:
-      console.log("default case worked in histograph.js");
+      console.log("default case worked in background.js");
   }
 });
