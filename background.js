@@ -107,8 +107,28 @@ browser.runtime.onMessage.addListener((msg, sender) => {
     case "change tab": //currently changes to tab#3, but in the future, use this to change to arbitrary tabID
       browser.tabs.update(3, { active: true });
       break;
+    case "collaborator":
+      let popupURL = browser.runtime.getURL("./collaborator.html");
+      let creating = browser.windows
+        .create({
+          url: popupURL/*,
+          type: "popup",
+          height: 200,
+          width: 200,*/
+        })
+        .then(
+          (windowInfo) => {
+            console.log(`Created window: ${windowInfo.id}`);
+          },
+          (error) => {
+            console.log(`Error: ${error}`);
+          }
+        );
+
+      break;
     case "log":
       console.log("Logged event:", msg.event);
+      break;
     default:
       console.log("Default case used for (msg) in background.js", msg);
   }

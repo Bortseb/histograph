@@ -1,9 +1,12 @@
 import { Graph } from "./graph.js";
 import { drop, dropl, dropu } from "./drop.js";
-export let hpccWasm = window["@hpcc-js/wasm"];
 import { display } from "./display.js";
-
+//window.hpccWasm = window["@hpcc-js/wasm"];
+console.log("window=", window);
+//console.log("hpccWasm",hpccWasm)
 console.log("collaborator.js import worked");
+
+const target = document.getElementById("target");
 
 // const beam = await fetch('./SituatedInstitutions.jsonl')
 //   .then(req => req.text())
@@ -18,8 +21,7 @@ let beam = await fetch("./robert.graph.json")
   .then((json) => [
     { name: "robert", graph: new Graph(json.nodes, json.rels) },
   ]);
-
-const target = document.querySelector("#target");
+console.log("Beam=", beam);
 
 window.over = function (event) {
   event.preventDefault();
@@ -35,6 +37,18 @@ window.drop = async function (event) {
 };
 
 display(beam, target);
+
+target.addEventListener("drop", (event) => {
+  drop(event);
+});
+
+target.addEventListener("dragover", (event) => {
+  over(event);
+});
+
+target.addEventListener("dragenter", (event) => {
+  over(event);
+});
 
 /* first attempt to over simplify
 import { Graph } from "./graph.js";

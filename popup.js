@@ -9,6 +9,9 @@ document.addEventListener("click", (e) => {
     case "switch":
       browser.runtime.sendMessage({ cmd: "change tab" });
       break;
+    case "collaborator":
+        browser.runtime.sendMessage({ cmd: "collaborator" });
+        break;
     default:
       console.log("default case worked in background.js");
   }
