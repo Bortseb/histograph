@@ -10,7 +10,6 @@ import { dotify } from "./dotify.js";
 import { hoverbold } from "./hoverbold.js";
 
 const graphviz = await Graphviz.load();
-console.log("graphviz=", graphviz);
 
 export async function display(chosen, target) {
   let targetsvg = null;
@@ -29,41 +28,40 @@ export async function display(chosen, target) {
       }
       const dot = dotify(complex);
       window.dot = dot;
-      graphviz.layout(window.dot, "svg", "dot").then((svg) => {
-        target.innerHTML = svg;
-        targetsvg = target.querySelector("svg");
+      const svg = graphviz.layout(window.dot, "svg", "dot");
+      target.innerHTML = svg;
+      targetsvg = target.querySelector("svg");
 
-        drawing = false;
-        hoverbold(target);
-        const targetBounds = {
-          width: target.clientWidth,
-          height: target.clientHeight,
-        };
-        const svgBounds = {
-          width: targetsvg.clientWidth,
-          height: targetsvg.clientHeight,
-        };
-        let svgElement = targetsvg;
-        panSVG = svgPanZoom(svgElement);
-        targetsvg.style.height = "100%";
-        targetsvg.style.width = "100%";
-        if (
-          targetBounds.width < svgBounds.width ||
-          targetBounds.height < svgBounds.height
-        ) {
-          panSVG.resize();
-        }
-        panSVG.fit();
-        panSVG.center();
-        if (
-          panZoom.size &&
-          panZoom.size.width == targetsvg.width.baseVal.valueInSpecifiedUnits &&
-          panZoom.size.height == targetsvg.height.baseVal.valueInSpecifiedUnits
-        ) {
-          panSVG.zoom(panZoom.zoom);
-          panSVG.pan(panZoom.pan);
-        }
-      });
+      drawing = false;
+      hoverbold(target);
+      const targetBounds = {
+        width: target.clientWidth,
+        height: target.clientHeight,
+      };
+      const svgBounds = {
+        width: targetsvg.clientWidth,
+        height: targetsvg.clientHeight,
+      };
+      let svgElement = targetsvg;
+      panSVG = svgPanZoom(svgElement);
+      targetsvg.style.height = "100%";
+      targetsvg.style.width = "100%";
+      if (
+        targetBounds.width < svgBounds.width ||
+        targetBounds.height < svgBounds.height
+      ) {
+        panSVG.resize();
+      }
+      panSVG.fit();
+      panSVG.center();
+      if (
+        panZoom.size &&
+        panZoom.size.width == targetsvg.width.baseVal.valueInSpecifiedUnits &&
+        panZoom.size.height == targetsvg.height.baseVal.valueInSpecifiedUnits
+      ) {
+        panSVG.zoom(panZoom.zoom);
+        panSVG.pan(panZoom.pan);
+      }
     } catch (err) {
       console.log("display error", err);
       drawing = false;

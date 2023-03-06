@@ -7,11 +7,13 @@ document.addEventListener("click", (e) => {
       browser.runtime.sendMessage({ cmd: "clear" });
       break;
     case "switch":
-      browser.runtime.sendMessage({ cmd: "change tab" });
+      const tabID = document.getElementById("tabID").Value;
+      console.log("sending message for tabID",tabID )
+      browser.runtime.sendMessage({ cmd: "change tab", tabID: tabID });
       break;
     case "collaborator":
-        browser.runtime.sendMessage({ cmd: "collaborator" });
-        break;
+      browser.runtime.sendMessage({ cmd: "collaborator" });
+      break;
     default:
       console.log("default case worked in background.js");
   }

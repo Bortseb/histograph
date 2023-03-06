@@ -1,9 +1,7 @@
 import { Graph } from "./graph.js";
 import { drop, dropl, dropu } from "./drop.js";
 import { display } from "./display.js";
-//window.hpccWasm = window["@hpcc-js/wasm"];
-console.log("window=", window);
-//console.log("hpccWasm",hpccWasm)
+
 console.log("collaborator.js import worked");
 
 const target = document.getElementById("target");
@@ -21,7 +19,8 @@ let beam = await fetch("./robert.graph.json")
   .then((json) => [
     { name: "robert", graph: new Graph(json.nodes, json.rels) },
   ]);
-console.log("Beam=", beam);
+
+display(beam, target);
 
 window.over = function (event) {
   event.preventDefault();
@@ -36,8 +35,6 @@ window.drop = async function (event) {
   display(beam, target);
 };
 
-display(beam, target);
-
 target.addEventListener("drop", (event) => {
   drop(event);
 });
@@ -49,13 +46,3 @@ target.addEventListener("dragover", (event) => {
 target.addEventListener("dragenter", (event) => {
   over(event);
 });
-
-/* first attempt to over simplify
-import { Graph } from "./graph.js";
-import { display } from "./display.js";
-export let hpccWasm = window["@hpcc-js/wasm"];
-let graph = browser.runtime.getBackgroundPage().graph;
-console.log("collaborator.js was run");
-//This might work, but I don't think this script knows what graph is? use local storage for graph passing?
-let beam = [{ name: "graph", graph: graph }];
-*/

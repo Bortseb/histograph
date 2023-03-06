@@ -1,14 +1,17 @@
 // move to using idb promised for graph persistence, then remove anything that isn't directly related to responding to events
 import { Graph } from "./graph.js";
+import { get, set, update, clear } from "./idb-keyval@6.2.0-dist-index.js";
 let graph = new Graph();
-browser.storage.local.get("graph").then(
-  (data) => {
-    console.log("stored data", data.graph);
-  },
-  (err) => {
-    console.log(err);
+
+get("graph").then((val) => {
+  if (val) {
+    console.log("graph existed", val);
+    let graph = new Graph(val.nodes, val.rels);
+    console.log("Graph is now:", graph);
+  } else {
+    console.log("Val is at startup", val);
   }
-);
+});
 
 let nids = {};
 let rels = {};
@@ -87,14 +90,7 @@ browser.runtime.onMessage.addListener((msg, sender) => {
       break;
     case "clear":
       graph = new Graph();
-      browser.storage.local.clear().then(
-        () => {
-          console.log("OK");
-        },
-        (e) => {
-          console.log(e);
-        }
-      );
+      clear();
       nids = {};
       tabData = {};
       break;
@@ -105,16 +101,16 @@ browser.runtime.onMessage.addListener((msg, sender) => {
       tabURL[sender.tab.id] = target;
       break;
     case "change tab": //currently changes to tab#3, but in the future, use this to change to arbitrary tabID
-      browser.tabs.update(3, { active: true });
+      browser.tabs.update(msg.tabId, { active: true });
       break;
     case "collaborator":
       let popupURL = browser.runtime.getURL("./collaborator.html");
       let creating = browser.windows
         .create({
-          url: popupURL/*,
-          type: "popup",
+          url: popupURL,
+          type: "popup" /*,
           height: 200,
-          width: 200,*/
+          width: 200,*/,
         })
         .then(
           (windowInfo) => {
@@ -163,9 +159,9 @@ browser.tabs.onUpdated.addListener((tabId, changeInfo, tabInfo) => {
 
   if ("url" in changeInfo) {
     addURL(changeInfo.url);
-    browser.storage.local.set({
-      graph: graph,
-    });
+    set("graph", graph)
+      .then(() => console.log("Setting graph worked!"))
+      .catch((err) => console.log("Setting graph failed!", err));
   }
   //Tab is starting to load something else after last complete status
   /*
