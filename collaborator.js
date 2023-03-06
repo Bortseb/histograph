@@ -1,24 +1,20 @@
 import { Graph } from "./graph.js";
-import { drop, dropl, dropu } from "./drop.js";
+import { drop, dropl } from "./drop.js";
 import { display } from "./display.js";
+import { get } from "./idb-keyval@6.2.0-dist-index.js";
 
 console.log("collaborator.js import worked");
 
 const target = document.getElementById("target");
 
-// const beam = await fetch('./SituatedInstitutions.jsonl')
-//   .then(req => req.text())
-//   .then(text => text.trim()
-//     .split(/\n/)
-//     .map(line => JSON.parse(line))
-//     .map(({name,graph}) => ({name,graph:new Graph(graph.nodes, graph.rels)})))
-// console.log({beam})
+let graph = await get("graph");
 
-let beam = await fetch("./robert.graph.json")
-  .then((req) => req.json())
-  .then((json) => [
-    { name: "robert", graph: new Graph(json.nodes, json.rels) },
-  ]);
+let beam = [
+  {
+    name: `tabs ${Date.now()}.graph.json`,
+    graph: new Graph(graph.nodes, graph.rels),
+  },
+];
 
 display(beam, target);
 
