@@ -105,16 +105,22 @@ browser.runtime.onMessage.addListener((msg, sender) => {
       break;
     case "collaborator":
       let popupURL = browser.runtime.getURL("./collaborator.html");
-      let creating = browser.windows
+
+      browser.windows
         .create({
           url: popupURL,
-          type: "popup" /*,
-          height: 200,
-          width: 200,*/,
+          type: "popup",
+          allowScriptsToClose: true,
+          titlePreface: "Collaborator",
+          /*height: 400,
+          width: 800,*/
         })
         .then(
           (windowInfo) => {
-            console.log(`Created window: ${windowInfo.id}`);
+            console.log(`Created window: `, windowInfo);
+            set("collaboratorID", windowInfo.id)
+              .then(() => console.log("Setting collaboratorID worked!"))
+              .catch((err) => console.log("Setting collaboratorID failed!", err));
           },
           (error) => {
             console.log(`Error: ${error}`);

@@ -29,9 +29,16 @@ export async function display(chosen, target) {
       const dot = dotify(complex);
       window.dot = dot;
       const svg = graphviz.layout(window.dot, "svg", "dot");
+
       target.innerHTML = svg;
       targetsvg = target.querySelector("svg");
 
+      //targetsvg.setAttribute("height", "100")
+      const width = targetsvg.getBBox().width;
+      const height = targetsvg.getBBox().height;
+      console.log("height, width", height, width, `0 0 ${width} ${height}`);
+      //targetsvg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+      //Window.resizeTo(width, height)
       drawing = false;
       hoverbold(target);
       const targetBounds = {
