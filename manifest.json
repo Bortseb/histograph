@@ -25,5 +25,8 @@
     "gecko": {
       "strict_min_version": "58.0a1"
     }
+  },
+  "chrome_url_overrides" : {
+    "newtab": "collaborator.html"
   }
 }
