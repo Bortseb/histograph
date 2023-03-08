@@ -120,7 +120,9 @@ browser.runtime.onMessage.addListener((msg, sender) => {
             console.log(`Created window: `, windowInfo);
             set("collaboratorID", windowInfo.id)
               .then(() => console.log("Setting collaboratorID worked!"))
-              .catch((err) => console.log("Setting collaboratorID failed!", err));
+              .catch((err) =>
+                console.log("Setting collaboratorID failed!", err)
+              );
           },
           (error) => {
             console.log(`Error: ${error}`);

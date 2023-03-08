@@ -3,11 +3,10 @@ const windowLocation = "" + window.location;
 //Add every link that is clicked on as a new node
 window.addEventListener("click", (e) => {
   if (!e.target.closest("a")) {
-    console.log("no link clicked (e)", e);
     return;
   }
   const linkCLicked = e.target.closest("a").href;
-  if (e.ctrlKey) {
+  if (e.ctrlKey || e.metaKey) {
     browser.runtime.sendMessage({
       cmd: "click",
       source: windowLocation,
@@ -26,7 +25,6 @@ window.addEventListener("click", (e) => {
 
 window.addEventListener("auxclick", (e) => {
   if (!e.target.closest("a")) {
-    //console.log("no link clicked (e)", e);
     return;
   }
   const linkCLicked = e.target.closest("a").href;

@@ -1,4 +1,3 @@
-console.log("collaborator.js import worked");
 import { Graph } from "./graph.js";
 import { drop, dropl } from "./drop.js";
 import { display } from "./display.js";
@@ -15,17 +14,15 @@ let beam = [
 display(beam, target);
 
 const dropping = async function (event) {
-  console.log("dropped inside function now");
   beam = [
     ...(await dropl(event, ".jsonl")),
-    ...(await drop(event, ".graph.json"))
+    ...(await drop(event, ".graph.json")),
   ];
   display(beam, target);
 };
 
 target.addEventListener("drop", (event) => {
   event.preventDefault();
-  console.log("drop heard");
   dropping(event);
 });
 
