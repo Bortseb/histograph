@@ -1,15 +1,13 @@
 //from https://github.com/WardCunningham/graph/blob/main/docs/collaborator/display.js
-console.log("display.js import worked");
-
-let drawing = false;
-let panSVG = null;
-const panZoom = {};
 import { Graphviz } from "./graphviz.js";
 import { composite } from "./composite.js";
 import { dotify } from "./dotify.js";
 import { hoverbold } from "./hoverbold.js";
 
 const graphviz = await Graphviz.load();
+let drawing = false;
+let panSVG = null;
+const panZoom = {};
 
 export async function display(chosen, target) {
   let targetsvg = null;
