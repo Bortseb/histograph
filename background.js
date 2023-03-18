@@ -222,33 +222,64 @@ browser.webNavigation.onCompleted.addListener((event) => {
 
 //TODO, make all event listeners here modify the graph in some way, assuming this will be non-persistent soon. Persistent : false will be added to the background in manaifest once this is done.
 
-
-
 function listener(details) {
-  console.log("request url",details.url)
+  if (details.type === "script"){
+    
+  }
   //details.url is the request url, for things like client.js
   //details.type is either main_frame or script
   let filter = browser.webRequest.filterResponseData(details.requestId);
   let decoder = new TextDecoder("utf-8");
   let encoder = new TextEncoder();
 
-  filter.ondata = event => {
-    console.log("requestID",details.requestId)
-    console.log("webrequest event",event)
-    let str = decoder.decode(event.data, {stream: true});
-    console.log("filtered response",str)
+  filter.ondata = (event) => {
+    console.log("requestID", details.requestId);
+    console.log("webrequest event", event);
+    let str = decoder.decode(event.data, { stream: true });
+    console.log("filtered response", str);
     // Just change any instance of Example in the HTTP response
     // to WebExtension Example.
     //str = str.replace(/Example/g, 'WebExtension Example');
     filter.write(encoder.encode(str));
     filter.disconnect();
-  }
+  };
 
   return {};
 }
 
-browser.webRequest.onBeforeRequest.addListener(
-  listener,
-  {urls: ["<all_urls>"], types: ["main_frame", "script"]},
-  ["blocking"]
-);
+browser.webRequest.onBeforeRequest.addListener(listener, {
+  urls: ["<all_urls>"],
+  types: ["main_frame", "sub_frame", "script"],
+});
+browser.webRequest.onBeforeSendHeaders.addListener(listener, {
+  urls: ["<all_urls>"],
+  types: ["main_frame", "sub_frame", "script"],
+});
+browser.webRequest.onSendHeaders.addListener(listener, {
+  urls: ["<all_urls>"],
+  types: ["main_frame", "sub_frame", "script"],
+});
+browser.webRequest.onHeadersReceived.addListener(listener, {
+  urls: ["<all_urls>"],
+  types: ["main_frame", "sub_frame", "script"],
+});
+browser.webRequest.onAuthRequired.addListener(listener, {
+  urls: ["<all_urls>"],
+  types: ["main_frame", "sub_frame", "script"],
+});
+browser.webRequest.onResponseStarted.addListener(listener, {
+  urls: ["<all_urls>"],
+  types: ["main_frame", "sub_frame", "script"],
+});
+browser.webRequest.onBeforeRedirect.addListener(listener, {
+  urls: ["<all_urls>"],
+  types: ["main_frame", "sub_frame", "script"],
+});
+browser.webRequest.onCompleted.addListener(listener, {
+  urls: ["<all_urls>"],
+  types: ["main_frame", "sub_frame", "script"],
+});
+browser.webRequest.onErrorOccurred.addListener(listener, {
+  urls: ["<all_urls>"],
+  types: ["main_frame", "sub_frame", "script"],
+});
