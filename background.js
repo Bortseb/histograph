@@ -2,6 +2,7 @@
 import { Graph } from "./graph.js";
 import { get, set, update, clear } from "./idb-keyval@6.2.0-dist-index.js";
 let graph = new Graph();
+let requests = "";
 
 get("graph").then((val) => {
   if (val) {
@@ -9,7 +10,15 @@ get("graph").then((val) => {
     let graph = new Graph(val.nodes, val.rels);
     console.log("Graph is now:", graph);
   } else {
-    console.log("Val is at startup", val);
+    console.log("Val doesn't evaluate as true for graph", val);
+  }
+});
+
+get("requests").then((val) => {
+  if (val) {
+    let requests = val;
+  } else {
+    console.log("Val doesn't evaluate as true for requests", val);
   }
 });
 
@@ -222,9 +231,10 @@ browser.webNavigation.onCompleted.addListener((event) => {
 
 //TODO, make all event listeners here modify the graph in some way, assuming this will be non-persistent soon. Persistent : false will be added to the background in manaifest once this is done.
 
-function listener(details) {
-  if (details.type === "script"){
-    
+function request_listener(details, event_type) {
+
+  //TODO make this listener compile everything it hears into a JSONL doc to parse with jq later
+  if (details.type === "script") {
   }
   //details.url is the request url, for things like client.js
   //details.type is either main_frame or script
@@ -240,46 +250,37 @@ function listener(details) {
     // Just change any instance of Example in the HTTP response
     // to WebExtension Example.
     //str = str.replace(/Example/g, 'WebExtension Example');
-    filter.write(encoder.encode(str));
+    //filter.write(encoder.encode(str));
     filter.disconnect();
   };
 
   return {};
 }
 
-browser.webRequest.onBeforeRequest.addListener(listener, {
-  urls: ["<all_urls>"],
-  types: ["main_frame", "sub_frame", "script"],
-});
-browser.webRequest.onBeforeSendHeaders.addListener(listener, {
-  urls: ["<all_urls>"],
-  types: ["main_frame", "sub_frame", "script"],
-});
-browser.webRequest.onSendHeaders.addListener(listener, {
-  urls: ["<all_urls>"],
-  types: ["main_frame", "sub_frame", "script"],
-});
-browser.webRequest.onHeadersReceived.addListener(listener, {
-  urls: ["<all_urls>"],
-  types: ["main_frame", "sub_frame", "script"],
-});
-browser.webRequest.onAuthRequired.addListener(listener, {
-  urls: ["<all_urls>"],
-  types: ["main_frame", "sub_frame", "script"],
-});
-browser.webRequest.onResponseStarted.addListener(listener, {
-  urls: ["<all_urls>"],
-  types: ["main_frame", "sub_frame", "script"],
-});
-browser.webRequest.onBeforeRedirect.addListener(listener, {
-  urls: ["<all_urls>"],
-  types: ["main_frame", "sub_frame", "script"],
-});
-browser.webRequest.onCompleted.addListener(listener, {
-  urls: ["<all_urls>"],
-  types: ["main_frame", "sub_frame", "script"],
-});
-browser.webRequest.onErrorOccurred.addListener(listener, {
-  urls: ["<all_urls>"],
-  types: ["main_frame", "sub_frame", "script"],
-});
+browser.webRequest.onBeforeRequest.addListener(
+  (details) => { request_listener(details, "onBeforeRequest") },
+  { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script"] });
+browser.webRequest.onBeforeSendHeaders.addListener(
+  (details) => { request_listener(details, "onBeforeSendHeaders") },
+  { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script"] });
+browser.webRequest.onSendHeaders.addListener(
+  (details) => { request_listener(details, "onSendHeaders") },
+  { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script"] });
+browser.webRequest.onHeadersReceived.addListener(
+  (details) => { request_listener(details, "onHeadersReceived") },
+  { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script"] });
+browser.webRequest.onAuthRequired.addListener(
+  (details) => { request_listener(details, "onAuthRequired") },
+  { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script"] });
+browser.webRequest.onResponseStarted.addListener(
+  (details) => { request_listener(details, "onResponseStarted") },
+  { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script"] });
+browser.webRequest.onBeforeRedirect.addListener(
+  (details) => { request_listener(details, "onBeforeRedirect") },
+  { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script"] });
+browser.webRequest.onCompleted.addListener(
+  (details) => { request_listener(details, "onCompleted") },
+  { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script"] });
+browser.webRequest.onErrorOccurred.addListener(
+  (details) => { request_listener(details, "onErrorOccurred") },
+  { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script"] });
