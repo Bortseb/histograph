@@ -3,12 +3,15 @@ document.addEventListener("click", (e) => {
     case "download-history":
       browser.runtime.sendMessage({ cmd: "download" });
       break;
+    case "download-jsonl":
+      browser.runtime.sendMessage({ cmd: "jsonl" });
+      break;
     case "clear-history":
       browser.runtime.sendMessage({ cmd: "clear" });
       break;
     case "switch":
       const tabID = document.getElementById("tabID").Value;
-      console.log("sending message for tabID",tabID )
+      console.log("sending message for tabID", tabID)
       browser.runtime.sendMessage({ cmd: "change tab", tabID: tabID });
       break;
     case "collaborator":

@@ -2,7 +2,7 @@
 import { Graph } from "./graph.js";
 import { get, set, update, clear } from "./idb-keyval@6.2.0-dist-index.js";
 let graph = new Graph();
-let requests = "";
+let jsonl = "";
 
 get("graph").then((val) => {
   if (val) {
@@ -14,11 +14,11 @@ get("graph").then((val) => {
   }
 });
 
-get("requests").then((val) => {
+get("jsonl").then((val) => {
   if (val) {
-    let requests = val;
+    let jsonl = val;
   } else {
-    console.log("Val doesn't evaluate as true for requests", val);
+    console.log("Val doesn't evaluate as true for jsonl", val);
   }
 });
 
@@ -97,8 +97,19 @@ browser.runtime.onMessage.addListener((msg, sender) => {
       console.log("trying to DL", graph, graph.stringify(null, 2));
       download(graph.stringify(null, 2), `tabs ${Date.now()}.graph.json`);
       break;
+    case "jsonl":
+      console.log("trying to DL jsonl", jsonl, JSON.stringify(jsonl, null, 2));
+      download(JSON.stringify(jsonl, null, 2), `jsonl ${Date.now}.json`);
+      break;
     case "clear":
       graph = new Graph();
+      set("graph", graph)
+      .then(() => console.log("Clearing graph worked!"))
+      .catch((err) => console.log("Clearing graph failed!", err));
+      jsonl = ""
+      set("jsonl", jsonl)
+      .then(() => console.log("Clearing jsonl worked!"))
+      .catch((err) => console.log("Clearing jsonl failed!", err));
       clear();
       nids = {};
       tabData = {};
@@ -232,8 +243,9 @@ browser.webNavigation.onCompleted.addListener((event) => {
 //TODO, make all event listeners here modify the graph in some way, assuming this will be non-persistent soon. Persistent : false will be added to the background in manaifest once this is done.
 
 function request_listener(details, event_type) {
-
   //TODO make this listener compile everything it hears into a JSONL doc to parse with jq later
+  jsonl += JSON.stringify({ ...details, "request-type": event_type, "object-type": "request" }) + "\n"
+
   if (details.type === "script") {
   }
   //details.url is the request url, for things like client.js
@@ -243,6 +255,7 @@ function request_listener(details, event_type) {
   let encoder = new TextEncoder();
 
   filter.ondata = (event) => {
+    jsonl += JSON.stringify({ ...event, "request-type": event_type, "object-type": "response" }) + "\n"
     console.log("requestID", details.requestId);
     console.log("webrequest event", event);
     let str = decoder.decode(event.data, { stream: true });
@@ -257,30 +270,30 @@ function request_listener(details, event_type) {
   return {};
 }
 
-browser.webRequest.onBeforeRequest.addListener(
+browser.webRequest.onBeforeRequest.addListener( //unique objects: requestBody,frameAncestors
   (details) => { request_listener(details, "onBeforeRequest") },
   { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script"] });
-browser.webRequest.onBeforeSendHeaders.addListener(
+browser.webRequest.onBeforeSendHeaders.addListener( //unique objects: requestHeaders Optional
   (details) => { request_listener(details, "onBeforeSendHeaders") },
   { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script"] });
-browser.webRequest.onSendHeaders.addListener(
+browser.webRequest.onSendHeaders.addListener( //unique objects: requestHeaders
   (details) => { request_listener(details, "onSendHeaders") },
   { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script"] });
-browser.webRequest.onHeadersReceived.addListener(
+browser.webRequest.onHeadersReceived.addListener( //unique objects: frameAncestors
   (details) => { request_listener(details, "onHeadersReceived") },
   { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script"] });
-browser.webRequest.onAuthRequired.addListener(
+browser.webRequest.onAuthRequired.addListener( //unique objects: scheme, realm, isProxy, challenger
   (details) => { request_listener(details, "onAuthRequired") },
   { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script"] });
-browser.webRequest.onResponseStarted.addListener(
+browser.webRequest.onResponseStarted.addListener( //unique objects: 
   (details) => { request_listener(details, "onResponseStarted") },
   { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script"] });
-browser.webRequest.onBeforeRedirect.addListener(
+browser.webRequest.onBeforeRedirect.addListener( //unique objects: redirectUrl
   (details) => { request_listener(details, "onBeforeRedirect") },
   { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script"] });
-browser.webRequest.onCompleted.addListener(
+browser.webRequest.onCompleted.addListener( //unique objects: 
   (details) => { request_listener(details, "onCompleted") },
   { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script"] });
-browser.webRequest.onErrorOccurred.addListener(
+browser.webRequest.onErrorOccurred.addListener( //unique objects: error
   (details) => { request_listener(details, "onErrorOccurred") },
   { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script"] });
