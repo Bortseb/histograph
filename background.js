@@ -99,7 +99,7 @@ browser.runtime.onMessage.addListener((msg, sender) => {
       break;
     case "jsonl":
       console.log("trying to DL jsonl", jsonl, JSON.stringify(jsonl, null, 2));
-      download(JSON.stringify(jsonl, null, 2), `jsonl ${Date.now}.json`);
+      download(JSON.stringify(jsonl, null, 2), `jsonl ${Date.now()}.json`);
       break;
     case "clear":
       graph = new Graph();
@@ -244,6 +244,7 @@ browser.webNavigation.onCompleted.addListener((event) => {
 
 function request_listener(details, event_type) {
   //TODO make this listener compile everything it hears into a JSONL doc to parse with jq later
+  console.log("stringified details looks like this:",JSON.stringify({ ...details, "request-type": event_type, "object-type": "request" }))
   jsonl += JSON.stringify({ ...details, "request-type": event_type, "object-type": "request" }) + "\n"
 
   if (details.type === "script") {
