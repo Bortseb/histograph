@@ -3,7 +3,7 @@ import { Graph } from "./graph.js";
 import { get, set, update, clear } from "./idb-keyval@6.2.0-dist-index.js";
 let graph = new Graph();
 let jsonl = "";
-console.log("initial jsonl",jsonl)
+console.log("initial jsonl", jsonl)
 
 get("graph").then((val) => {
   if (val) {
@@ -12,16 +12,16 @@ get("graph").then((val) => {
     console.log("Graph is now:", graph);
   } else {
     console.log("Val doesn't evaluate as true for graph", val);
-    console.log("jsonl after failed get",jsonl)
   }
 });
 
 get("jsonl").then((val) => {
   if (val) {
     let jsonl = val;
-    console.log(" coming from indexeddb",jsonl)
+    console.log(" coming from indexeddb", jsonl)
   } else {
     console.log("Val doesn't evaluate as true for jsonl", val);
+    console.log("jsonl after failed get", jsonl)
   }
 });
 
@@ -102,17 +102,17 @@ browser.runtime.onMessage.addListener((msg, sender) => {
       break;
     case "jsonl":
       console.log("trying to DL jsonl", jsonl, JSON.stringify(jsonl, null, 2));
-      download(JSON.stringify(jsonl, null, 2), `jsonl ${Date.now()}.json`);
+      download(jsonl, `jsonl ${Date.now()}.json`);
       break;
     case "clear":
       graph = new Graph();
       set("graph", graph)
-      .then(() => console.log("Clearing graph worked!"))
-      .catch((err) => console.log("Clearing graph failed!", err));
+        .then(() => console.log("Clearing graph worked!"))
+        .catch((err) => console.log("Clearing graph failed!", err));
       jsonl = ""
       set("jsonl", jsonl)
-      .then(() => console.log("Clearing jsonl worked!"))
-      .catch((err) => console.log("Clearing jsonl failed!", err));
+        .then(() => console.log("Clearing jsonl worked!"))
+        .catch((err) => console.log("Clearing jsonl failed!", err));
       clear();
       nids = {};
       tabData = {};
@@ -247,26 +247,34 @@ browser.webNavigation.onCompleted.addListener((event) => {
 
 function request_listener(details, event_type) {
   //TODO make this listener compile everything it hears into a JSONL doc to parse with jq later
-  console.log("event object for webrequest",{"request-type": event_type, "object-type": "request",  ...details})
-  console.log("stringified details looks like this:",JSON.stringify({"request-type": event_type, "object-type": "request",  ...details}))
-  jsonl += JSON.stringify({"request-type": event_type, "object-type": "request",  ...details}) + "\n"
+  console.log("event object for webrequest", { "request-type": event_type, "object-type": "request", ...details })
+  console.log("stringified details looks like this:", JSON.stringify({ "request-type": event_type, "object-type": "request", ...details }))
+  jsonl += JSON.stringify({ "request-type": event_type, "object-type": "request", ...details }) + "\n"
   set("jsonl", jsonl)
-  .then(() => console.log("Setting jsonl worked!"))
-  .catch((err) =>
-    console.log("Setting jsonl failed!", err)
-  );
+    .then(() => console.log("Setting jsonl worked in request!"))
+    .catch((err) =>
+      console.log("Setting jsonl failed!", err)
+    );
   console.log("jsonl", jsonl)
 
   if (details.type === "script") {
   }
   //details.url is the request url, for things like client.js
   //details.type is either main_frame or script
+  console.log("Details.requestID", details.requestId)
   let filter = browser.webRequest.filterResponseData(details.requestId);
+  console.log("Filter", filter)
   let decoder = new TextDecoder("utf-8");
   let encoder = new TextEncoder();
 
   filter.ondata = (event) => {
-    //jsonl += JSON.stringify({ ...event, "request-type": event_type, "object-type": "response" }) + "\n"
+    console.log("I'm in an event!")
+    jsonl += JSON.stringify({ "request-type": event_type, "object-type": "response", ...event }) + "\n"
+    set("jsonl", jsonl)
+      .then(() => console.log("Setting jsonl worked in response!"))
+      .catch((err) =>
+        console.log("Setting jsonl failed!", err)
+      );
     console.log("requestID", details.requestId);
     console.log("webrequest event", event);
     let str = decoder.decode(event.data, { stream: true });
@@ -274,7 +282,7 @@ function request_listener(details, event_type) {
     // Just change any instance of Example in the HTTP response
     // to WebExtension Example.
     //str = str.replace(/Example/g, 'WebExtension Example');
-    //filter.write(encoder.encode(str));
+    filter.write(encoder.encode(str));
     filter.disconnect();
   };
 
@@ -283,19 +291,23 @@ function request_listener(details, event_type) {
 
 browser.webRequest.onBeforeRequest.addListener( //unique objects: requestBody,frameAncestors
   (details) => { request_listener(details, "onBeforeRequest") },
-  { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script"] });
+  { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script"] },
+  ["blocking"]);
 browser.webRequest.onBeforeSendHeaders.addListener( //unique objects: requestHeaders Optional
   (details) => { request_listener(details, "onBeforeSendHeaders") },
-  { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script"] });
+  { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script"] },
+  ["blocking"]);
 browser.webRequest.onSendHeaders.addListener( //unique objects: requestHeaders
   (details) => { request_listener(details, "onSendHeaders") },
   { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script"] });
 browser.webRequest.onHeadersReceived.addListener( //unique objects: frameAncestors
   (details) => { request_listener(details, "onHeadersReceived") },
-  { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script"] });
+  { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script"] },
+  ["blocking"]);
 browser.webRequest.onAuthRequired.addListener( //unique objects: scheme, realm, isProxy, challenger
   (details) => { request_listener(details, "onAuthRequired") },
-  { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script"] });
+  { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script"] },
+  ["blocking"]);
 browser.webRequest.onResponseStarted.addListener( //unique objects: 
   (details) => { request_listener(details, "onResponseStarted") },
   { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script"] });
