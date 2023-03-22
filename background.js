@@ -3,6 +3,7 @@ import { Graph } from "./graph.js";
 import { get, set, update, clear } from "./idb-keyval@6.2.0-dist-index.js";
 let graph = new Graph();
 let jsonl = "";
+console.log("initial jsonl",jsonl)
 
 get("graph").then((val) => {
   if (val) {
@@ -11,12 +12,14 @@ get("graph").then((val) => {
     console.log("Graph is now:", graph);
   } else {
     console.log("Val doesn't evaluate as true for graph", val);
+    console.log("jsonl after failed get",jsonl)
   }
 });
 
 get("jsonl").then((val) => {
   if (val) {
     let jsonl = val;
+    console.log(" coming from indexeddb",jsonl)
   } else {
     console.log("Val doesn't evaluate as true for jsonl", val);
   }
@@ -244,8 +247,15 @@ browser.webNavigation.onCompleted.addListener((event) => {
 
 function request_listener(details, event_type) {
   //TODO make this listener compile everything it hears into a JSONL doc to parse with jq later
-  console.log("stringified details looks like this:",JSON.stringify({ ...details, "request-type": event_type, "object-type": "request" }))
-  jsonl += JSON.stringify({ ...details, "request-type": event_type, "object-type": "request" }) + "\n"
+  console.log("event object for webrequest",{"request-type": event_type, "object-type": "request",  ...details})
+  console.log("stringified details looks like this:",JSON.stringify({"request-type": event_type, "object-type": "request",  ...details}))
+  jsonl += JSON.stringify({"request-type": event_type, "object-type": "request",  ...details}) + "\n"
+  set("jsonl", jsonl)
+  .then(() => console.log("Setting jsonl worked!"))
+  .catch((err) =>
+    console.log("Setting jsonl failed!", err)
+  );
+  console.log("jsonl", jsonl)
 
   if (details.type === "script") {
   }
@@ -256,7 +266,7 @@ function request_listener(details, event_type) {
   let encoder = new TextEncoder();
 
   filter.ondata = (event) => {
-    jsonl += JSON.stringify({ ...event, "request-type": event_type, "object-type": "response" }) + "\n"
+    //jsonl += JSON.stringify({ ...event, "request-type": event_type, "object-type": "response" }) + "\n"
     console.log("requestID", details.requestId);
     console.log("webrequest event", event);
     let str = decoder.decode(event.data, { stream: true });
