@@ -289,34 +289,36 @@ function request_listener(details, event_type) {
   return {};
 }
 
+
+// Other options image media object other web_manifest xmlhttprequest 
 browser.webRequest.onBeforeRequest.addListener( //unique objects: requestBody,frameAncestors
   (details) => { request_listener(details, "onBeforeRequest") },
-  { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script"] },
+  { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script", "object", "other", "web_manifest", "xmlhttprequest", "image", "media"] },
   ["blocking"]);
 browser.webRequest.onBeforeSendHeaders.addListener( //unique objects: requestHeaders Optional
   (details) => { request_listener(details, "onBeforeSendHeaders") },
-  { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script"] },
+  { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script", "object", "other", "web_manifest", "xmlhttprequest", "image", "media"] },
   ["blocking"]);
 browser.webRequest.onSendHeaders.addListener( //unique objects: requestHeaders
   (details) => { request_listener(details, "onSendHeaders") },
-  { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script"] });
+  { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script", "object", "other", "web_manifest", "xmlhttprequest", "image", "media"] });
 browser.webRequest.onHeadersReceived.addListener( //unique objects: frameAncestors
   (details) => { request_listener(details, "onHeadersReceived") },
-  { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script"] },
+  { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script", "object", "other", "web_manifest", "xmlhttprequest", "image", "media"] },
   ["blocking"]);
 browser.webRequest.onAuthRequired.addListener( //unique objects: scheme, realm, isProxy, challenger
   (details) => { request_listener(details, "onAuthRequired") },
-  { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script"] },
+  { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script", "object", "other", "web_manifest", "xmlhttprequest", "image", "media"] },
   ["blocking"]);
 browser.webRequest.onResponseStarted.addListener( //unique objects: 
   (details) => { request_listener(details, "onResponseStarted") },
-  { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script"] });
+  { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script", "object", "other", "web_manifest", "xmlhttprequest", "image", "media"] });
 browser.webRequest.onBeforeRedirect.addListener( //unique objects: redirectUrl
   (details) => { request_listener(details, "onBeforeRedirect") },
-  { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script"] });
+  { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script", "object", "other", "web_manifest", "xmlhttprequest", "image", "media"] });
 browser.webRequest.onCompleted.addListener( //unique objects: 
   (details) => { request_listener(details, "onCompleted") },
-  { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script"] });
+  { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script", "object", "other", "web_manifest", "xmlhttprequest", "image", "media"] });
 browser.webRequest.onErrorOccurred.addListener( //unique objects: error
   (details) => { request_listener(details, "onErrorOccurred") },
-  { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script"] });
+  { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script", "object", "other", "web_manifest", "xmlhttprequest", "image", "media"] });
