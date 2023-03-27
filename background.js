@@ -3,13 +3,10 @@ import { Graph } from "./graph.js";
 import { get, set, update, clear } from "./idb-keyval@6.2.0-dist-index.js";
 let graph = new Graph();
 let jsonl = "";
-console.log("initial jsonl", jsonl)
 
 get("graph").then((val) => {
   if (val) {
-    console.log("graph existed", val);
     let graph = new Graph(val.nodes, val.rels);
-    console.log("Graph is now:", graph);
   } else {
     console.log("Val doesn't evaluate as true for graph", val);
   }
@@ -18,7 +15,6 @@ get("graph").then((val) => {
 get("jsonl").then((val) => {
   if (val) {
     let jsonl = val;
-    console.log(" coming from indexeddb", jsonl)
   } else {
     console.log("Val doesn't evaluate as true for jsonl", val);
     console.log("jsonl after failed get", jsonl)
@@ -107,11 +103,11 @@ browser.runtime.onMessage.addListener((msg, sender) => {
     case "clear":
       graph = new Graph();
       set("graph", graph)
-        .then(() => console.log("Clearing graph worked!"))
+        .then()
         .catch((err) => console.log("Clearing graph failed!", err));
       jsonl = ""
       set("jsonl", jsonl)
-        .then(() => console.log("Clearing jsonl worked!"))
+        .then()
         .catch((err) => console.log("Clearing jsonl failed!", err));
       clear();
       nids = {};
@@ -191,7 +187,7 @@ browser.tabs.onUpdated.addListener((tabId, changeInfo, tabInfo) => {
   if ("url" in changeInfo) {
     addURL(changeInfo.url);
     set("graph", graph)
-      .then(() => console.log("Setting graph worked!"))
+      .then()
       .catch((err) => console.log("Setting graph failed!", err));
   }
   //Tab is starting to load something else after last complete status
@@ -247,44 +243,53 @@ browser.webNavigation.onCompleted.addListener((event) => {
 
 function request_listener(details, event_type) {
   //TODO make this listener compile everything it hears into a JSONL doc to parse with jq later
-  console.log("event object for webrequest", { "request-type": event_type, "object-type": "request", ...details })
-  console.log("stringified details looks like this:", JSON.stringify({ "request-type": event_type, "object-type": "request", ...details }))
+  //console.log("event object for webrequest", { "request-type": event_type, "object-type": "request", ...details })
+  //console.log("stringified details looks like this:", JSON.stringify({ "request-type": event_type, "object-type": "request", ...details }))
   jsonl += JSON.stringify({ "request-type": event_type, "object-type": "request", ...details }) + "\n"
   set("jsonl", jsonl)
-    .then(() => console.log("Setting jsonl worked in request!"))
-    .catch((err) =>
-      console.log("Setting jsonl failed!", err)
-    );
-  console.log("jsonl", jsonl)
+    .then()
+    .catch((err) => console.log("Setting jsonl failed!", err));
+  //console.log("jsonl", jsonl)
+
 
   if (details.type === "script") {
-  }
-  //details.url is the request url, for things like client.js
-  //details.type is either main_frame or script
-  console.log("Details.requestID", details.requestId)
-  let filter = browser.webRequest.filterResponseData(details.requestId);
-  console.log("Filter", filter)
-  let decoder = new TextDecoder("utf-8");
-  let encoder = new TextEncoder();
+    if (details.url.split("/").pop() === "client.js") {
+      console.log("WE've got a client!")
 
-  filter.ondata = (event) => {
-    console.log("I'm in an event!")
-    jsonl += JSON.stringify({ "request-type": event_type, "object-type": "response", ...event }) + "\n"
-    set("jsonl", jsonl)
-      .then(() => console.log("Setting jsonl worked in response!"))
-      .catch((err) =>
-        console.log("Setting jsonl failed!", err)
-      );
-    console.log("requestID", details.requestId);
-    console.log("webrequest event", event);
-    let str = decoder.decode(event.data, { stream: true });
-    console.log("filtered response", str);
-    // Just change any instance of Example in the HTTP response
-    // to WebExtension Example.
-    //str = str.replace(/Example/g, 'WebExtension Example');
-    filter.write(encoder.encode(str));
-    filter.disconnect();
-  };
+      //details.url is the request url, for things like client.js
+      //details.type is either main_frame or script
+      //console.log("Details.requestID", details.requestId)
+      let filter = browser.webRequest.filterResponseData(details.requestId);
+      //console.log("Filter", filter)
+      let decoder = new TextDecoder("utf-8");
+      let encoder = new TextEncoder();
+
+      filter.ondata = (event) => {
+        console.log("I'm getting response events!")
+        //console.log("requestID", details.requestId);
+        //console.log("webrequest event", event);
+        let str = decoder.decode(event.data, { stream: true });
+        if (str.includes("wiki-client") && str.includes("Cunningham")) {
+          console.log("We've got a wiki!")
+          jsonl += JSON.stringify({ "request-type": event_type, "object-type": "response", "requestId": details.requestId, "isWiki": true, ...event }) + "\n"
+          set("jsonl", jsonl)
+            .then()
+            .catch((err) => console.log("Setting jsonl failed!", err));
+        } else {
+          jsonl += JSON.stringify({ "request-type": event_type, "object-type": "response", "requestId": details.requestId, "isWiki": false, ...event }) + "\n"
+          set("jsonl", jsonl)
+            .then()
+            .catch((err) => console.log("Setting jsonl failed!", err));
+        }
+        //console.log("filtered response", str);
+        // Just change any instance of Example in the HTTP response
+        // to WebExtension Example.
+        //str = str.replace(/Example/g, 'WebExtension Example');
+        filter.write(encoder.encode(str));
+        filter.disconnect();
+      };
+    }
+  }
 
   return {};
 }
