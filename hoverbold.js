@@ -1,11 +1,11 @@
 // embolden lines from graphviz svg nodes on hover
-// from https://github.com/WardCunningham/graph/blob/main/docs/collaborator/hoverbold.js
-console.log("hoverbold.js import worked")
+
 export function hoverbold(div,select='both') {
   let rels = [] // [[edge, from, to], ...]
   const title = target => target.querySelector('title').textContent.replace(/\\n/g,' ')
   div.querySelectorAll('.edge').forEach(edge => rels.push([edge, ...title(edge).split('->')]))
   const trace = (node,doit) => {
+    console.log()
     const related = io => rels.filter(row => row[io]==node)
     switch (select) {
       case 'output':
@@ -26,7 +26,7 @@ export function hoverbold(div,select='both') {
     }
   }
   const feature = (event,width) => {
-    //if(width==3) console.log([...event.target.querySelectorAll('text')].map(e => e.innerHTML).join(" "))
+    if(width==3) console.log([...event.target.querySelectorAll('text')].map(e => e.innerHTML).join(" "))
   }
   const stroke = width => {
     const adjust = edge => edge.setAttribute('stroke-width',width)

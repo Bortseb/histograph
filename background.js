@@ -269,7 +269,7 @@ function request_listener(details, event_type) {
         //console.log("requestID", details.requestId);
         //console.log("webrequest event", event);
         let str = decoder.decode(event.data, { stream: true });
-        if (str.includes("wiki-client") && str.includes("Cunningham")) {
+        if (str.includes("*/! wiki-client")) {
           console.log("We've got a wiki!")
           jsonl += JSON.stringify({ "request-type": event_type, "object-type": "response", "requestId": details.requestId, "isWiki": true, ...event }) + "\n"
           set("jsonl", jsonl)
@@ -313,8 +313,7 @@ browser.webRequest.onBeforeRequest.addListener( //unique objects: requestBody,fr
 //   /*["blocking"]*/);
 browser.webRequest.onAuthRequired.addListener( //unique objects: scheme, realm, isProxy, challenger
   (details) => { request_listener(details, "onAuthRequired") },
-  { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script", "object", "other", "web_manifest", "xmlhttprequest", "image", "media"] },
-  ["blocking"]);
+  { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script", "object", "other", "web_manifest", "xmlhttprequest", "image", "media"] });
 // browser.webRequest.onResponseStarted.addListener( //unique objects: 
 //   (details) => { request_listener(details, "onResponseStarted") },
 //   { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script", "object", "other", "web_manifest", "xmlhttprequest", "image", "media"] });

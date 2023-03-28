@@ -1,6 +1,4 @@
 // read named graph files that have been dropped by event
-//from https://github.com/WardCunningham/graph/blob/main/docs/collaborator/drop.js
-console.log("drop.js import worked")
 
 import {Graph} from './graph.js'
 const inst = ({nodes,rels}) => {return new Graph(nodes, rels)}
