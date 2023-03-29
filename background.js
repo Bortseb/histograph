@@ -242,35 +242,25 @@ browser.webNavigation.onCompleted.addListener((event) => {
 //TODO, make all event listeners here modify the graph in some way, assuming this will be non-persistent soon. Persistent : false will be added to the background in manaifest once this is done.
 
 function request_listener(details, event_type) {
-  //TODO make this listener compile everything it hears into a JSONL doc to parse with jq later
-  //console.log("event object for webrequest", { "request-type": event_type, "object-type": "request", ...details })
-  //console.log("stringified details looks like this:", JSON.stringify({ "request-type": event_type, "object-type": "request", ...details }))
   jsonl += JSON.stringify({ "request-type": event_type, "object-type": "request", ...details }) + "\n"
   set("jsonl", jsonl)
     .then()
     .catch((err) => console.log("Setting jsonl failed!", err));
-  //console.log("jsonl", jsonl)
-
 
   if (details.type === "script") {
     if (details.url.split("/").pop() === "client.js") {
-      console.log("WE've got a client!")
 
-      //details.url is the request url, for things like client.js
-      //details.type is either main_frame or script
-      //console.log("Details.requestID", details.requestId)
       let filter = browser.webRequest.filterResponseData(details.requestId);
-      //console.log("Filter", filter)
       let decoder = new TextDecoder("utf-8");
       let encoder = new TextEncoder();
 
       filter.ondata = (event) => {
-        console.log("I'm getting response events!")
-        //console.log("requestID", details.requestId);
-        //console.log("webrequest event", event);
         let str = decoder.decode(event.data, { stream: true });
-        if (str.includes("*/! wiki-client")) {
-          console.log("We've got a wiki!")
+        if (str.substring(0, 15) === "/*! wiki-client") {
+          console.log("Graph before edit:",graph)
+          // const nid = nids[]
+          // console.log("Graph before edit:",graph.nodes)
+          
           jsonl += JSON.stringify({ "request-type": event_type, "object-type": "response", "requestId": details.requestId, "isWiki": true, ...event }) + "\n"
           set("jsonl", jsonl)
             .then()
@@ -281,10 +271,7 @@ function request_listener(details, event_type) {
             .then()
             .catch((err) => console.log("Setting jsonl failed!", err));
         }
-        //console.log("filtered response", str);
-        // Just change any instance of Example in the HTTP response
-        // to WebExtension Example.
-        //str = str.replace(/Example/g, 'WebExtension Example');
+
         filter.write(encoder.encode(str));
         filter.disconnect();
       };
@@ -311,18 +298,18 @@ browser.webRequest.onBeforeRequest.addListener( //unique objects: requestBody,fr
 //   (details) => { request_listener(details, "onHeadersReceived") },
 //   { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script", "object", "other", "web_manifest", "xmlhttprequest", "image", "media"] },
 //   /*["blocking"]*/);
-browser.webRequest.onAuthRequired.addListener( //unique objects: scheme, realm, isProxy, challenger
-  (details) => { request_listener(details, "onAuthRequired") },
-  { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script", "object", "other", "web_manifest", "xmlhttprequest", "image", "media"] });
+// browser.webRequest.onAuthRequired.addListener( //unique objects: scheme, realm, isProxy, challenger
+//   (details) => { request_listener(details, "onAuthRequired") },
+//   { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script", "object", "other", "web_manifest", "xmlhttprequest", "image", "media"] });
 // browser.webRequest.onResponseStarted.addListener( //unique objects: 
 //   (details) => { request_listener(details, "onResponseStarted") },
 //   { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script", "object", "other", "web_manifest", "xmlhttprequest", "image", "media"] });
-browser.webRequest.onBeforeRedirect.addListener( //unique objects: redirectUrl
-  (details) => { request_listener(details, "onBeforeRedirect") },
-  { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script", "object", "other", "web_manifest", "xmlhttprequest", "image", "media"] });
-browser.webRequest.onCompleted.addListener( //unique objects: 
-  (details) => { request_listener(details, "onCompleted") },
-  { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script", "object", "other", "web_manifest", "xmlhttprequest", "image", "media"] });
-browser.webRequest.onErrorOccurred.addListener( //unique objects: error
-  (details) => { request_listener(details, "onErrorOccurred") },
-  { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script", "object", "other", "web_manifest", "xmlhttprequest", "image", "media"] });
+// browser.webRequest.onBeforeRedirect.addListener( //unique objects: redirectUrl
+//   (details) => { request_listener(details, "onBeforeRedirect") },
+//   { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script", "object", "other", "web_manifest", "xmlhttprequest", "image", "media"] });
+// browser.webRequest.onCompleted.addListener( //unique objects: 
+//   (details) => { request_listener(details, "onCompleted") },
+//   { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script", "object", "other", "web_manifest", "xmlhttprequest", "image", "media"] });
+// browser.webRequest.onErrorOccurred.addListener( //unique objects: error
+//   (details) => { request_listener(details, "onErrorOccurred") },
+//   { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script", "object", "other", "web_manifest", "xmlhttprequest", "image", "media"] });

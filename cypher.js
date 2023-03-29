@@ -1,5 +1,4 @@
-//from https://github.com/WardCunningham/graph/blob/main/docs/cypher.js
-console.log("cypher.js import worked")
+
 export function parse(text, log=()=>{}) {
   const r = {}, x = {}               // rules defined and traced
   let left = '', right = text      // text parsed and pending
