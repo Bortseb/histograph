@@ -1,43 +1,59 @@
-// move to using idb promised for graph persistence, then remove anything that isn't directly related to responding to events
+// move to using idb promised for graph persistence, then remove anything that isn't directly related to responding toget( events
 import { Graph } from "./graph.js";
 import { get, set, update, clear } from "./idb-keyval@6.2.0-dist-index.js";
-let graph = new Graph();
-let jsonl = "";
+var graph = new Graph();
+var jsonl = "";
 
-get("graph").then((val) => {
-  if (val) {
-    let graph = new Graph(val.nodes, val.rels);
-  } else {
-    console.log("Val doesn't evaluate as true for graph", val);
+async function awaitGraph() {
+  try {
+    var getGraph = await get("graph")
+  } catch (err) {
+    console.error(err)
+    throw err;
   }
-});
+  graph = new Graph(getGraph.nodes, getGraph.rels)
+}
 
-get("jsonl").then((val) => {
-  if (val) {
-    let jsonl = val;
-  } else {
-    console.log("Val doesn't evaluate as true for jsonl", val);
-    console.log("jsonl after failed get", jsonl)
+awaitGraph()
+
+async function awaitJsonl() {
+  try {
+    var getJsonl = await get("jsonl")
+  } catch (err) {
+    console.error(err)
+    throw err;
   }
-});
+  jsonl = getJsonl
+}
 
-let nids = {};
-let rels = {};
-let activeTab = "";
-let openedBy = {};
-let tabURL = {};
-let tabData = {};
+awaitJsonl()
+
+let nids = {} // associates each URL to its node id
+let rels = {}
+let activeTab = ""
+let openedBy = {}
+let tabURL = {}
+let tabData = {}
+let tabNode = {}
 
 function addURL(url) {
   if (url in nids) {
     return nids[url];
   } else {
-    return (nids[url] = graph.addNode("URL", { name: url, url: url }));
+    nids[url] = graph.addNode("URL", { name: url, url: url })
+    set("graph", graph)
+      .then()
+      .catch((err) => console.log("Setting graph failed!", err));
+    return nids[url];
   }
 }
 
 function addLink(source, target, type, props) {
-  return (rels[target] = graph.addRel(`${type}`, source, target, props));
+  rels[target] = graph.addRel(`${type}`, source, target, props)
+  set("graph", graph)
+    .then()
+    .catch((err) => console.log("Setting graph failed!", err));
+  return rels[target]
 }
 
 function download(string, file, mime = "text/json") {
@@ -93,7 +109,6 @@ updateCount();
 browser.runtime.onMessage.addListener((msg, sender) => {
   switch (msg.cmd) {
     case "download":
-      console.log("trying to DL", graph, graph.stringify(null, 2));
       download(graph.stringify(null, 2), `tabs ${Date.now()}.graph.json`);
       break;
     case "jsonl":
@@ -109,7 +124,6 @@ browser.runtime.onMessage.addListener((msg, sender) => {
       set("jsonl", jsonl)
         .then()
         .catch((err) => console.log("Clearing jsonl failed!", err));
-      clear();
       nids = {};
       tabData = {};
       break;
@@ -119,10 +133,13 @@ browser.runtime.onMessage.addListener((msg, sender) => {
       addLink(source, target, msg.type, { which: "click on page" });
       tabURL[sender.tab.id] = target;
       break;
-    case "change tab": //currently changes to tab#3, but in the future, use this to change to arbitrary tabID
+    case "change tab":
       browser.tabs.update(msg.tabId, { active: true });
       break;
     case "collaborator":
+      graph = awaitGraph()
+      console.log("awaited for graph from collaborator message", graph)
+
       let popupURL = browser.runtime.getURL("./collaborator.html");
 
       browser.windows
@@ -184,11 +201,10 @@ browser.tabs.onActivated.addListener((activeInfo) => {
 browser.tabs.onUpdated.addListener((tabId, changeInfo, tabInfo) => {
   console.log("tabs.onUpdated (changeInfo, tabInfo)", changeInfo, tabInfo);
 
+  tabData[tabId] = tabInfo
+
   if ("url" in changeInfo) {
     addURL(changeInfo.url);
-    set("graph", graph)
-      .then()
-      .catch((err) => console.log("Setting graph failed!", err));
   }
   //Tab is starting to load something else after last complete status
   /*
@@ -226,6 +242,9 @@ browser.tabs.onUpdated.addListener((tabId, changeInfo, tabInfo) => {
 });
 
 browser.webNavigation.onCommitted.addListener((event) => {
+  tabData[event.tabId].transitionType = event.transitionType
+  tabData[event.tabId].transitionQualifiers = event.transitionQualifiers
+  console.log("TabData = ", tabData)
   console.log(
     "webNavigation.onCommitted:",
     event /*.transitionType, event.transitionQualifiers*/
@@ -233,16 +252,17 @@ browser.webNavigation.onCommitted.addListener((event) => {
 });
 
 browser.webNavigation.onCompleted.addListener((event) => {
-  console.log(
-    "webNavigation.onCompleted:",
-    event /*.transitionType, event.transitionQualifiers*/
-  );
+  // console.log(
+  //   "webNavigation.onCompleted:",
+  //   event /*.transitionType, event.transitionQualifiers*/
+  // );
 });
 
 //TODO, make all event listeners here modify the graph in some way, assuming this will be non-persistent soon. Persistent : false will be added to the background in manaifest once this is done.
 
 function request_listener(details, event_type) {
-  jsonl += JSON.stringify({ "request-type": event_type, "object-type": "request", ...details }) + "\n"
+  const { type, requestId, ...rest } = details
+  jsonl += JSON.stringify({ "request-type": event_type, "object-type": "request", "type": type, "requestId": requestId, ...rest }) + "\n"
   set("jsonl", jsonl)
     .then()
     .catch((err) => console.log("Setting jsonl failed!", err));
@@ -256,17 +276,18 @@ function request_listener(details, event_type) {
 
       filter.ondata = (event) => {
         let str = decoder.decode(event.data, { stream: true });
+        const { type, ...rest } = event
         if (str.substring(0, 15) === "/*! wiki-client") {
-          console.log("Graph before edit:",graph)
+          console.log("Graph before edit:", graph)
           // const nid = nids[]
           // console.log("Graph before edit:",graph.nodes)
-          
-          jsonl += JSON.stringify({ "request-type": event_type, "object-type": "response", "requestId": details.requestId, "isWiki": true, ...event }) + "\n"
+
+          jsonl += JSON.stringify({ "request-type": event_type, "object-type": "response", "type": type, "requestId": details.requestId, "isWiki": true, ...rest }) + "\n"
           set("jsonl", jsonl)
             .then()
             .catch((err) => console.log("Setting jsonl failed!", err));
         } else {
-          jsonl += JSON.stringify({ "request-type": event_type, "object-type": "response", "requestId": details.requestId, "isWiki": false, ...event }) + "\n"
+          jsonl += JSON.stringify({ "request-type": event_type, "object-type": "response", "requestId": details.requestId, "isWiki": false, ...rest }) + "\n"
           set("jsonl", jsonl)
             .then()
             .catch((err) => console.log("Setting jsonl failed!", err));
@@ -285,31 +306,31 @@ function request_listener(details, event_type) {
 // Other options image media object other web_manifest xmlhttprequest 
 browser.webRequest.onBeforeRequest.addListener( //unique objects: requestBody,frameAncestors
   (details) => { request_listener(details, "onBeforeRequest") },
-  { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script", "object", "other", "web_manifest", "xmlhttprequest", "image", "media"] },
+  { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script", "object", "other", "web_manifest", "xmlhttprequest"] },
   ["blocking"]);
 // browser.webRequest.onBeforeSendHeaders.addListener( //unique objects: requestHeaders Optional
 //   (details) => { request_listener(details, "onBeforeSendHeaders") },
-//   { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script", "object", "other", "web_manifest", "xmlhttprequest", "image", "media"] },
+//   { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script", "object", "other", "web_manifest", "xmlhttprequest"] },
 //   /*["blocking"]*/);
 // browser.webRequest.onSendHeaders.addListener( //unique objects: requestHeaders
 //   (details) => { request_listener(details, "onSendHeaders") },
-//   { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script", "object", "other", "web_manifest", "xmlhttprequest", "image", "media"] });
+//   { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script", "object", "other", "web_manifest", "xmlhttprequest"] });
 // browser.webRequest.onHeadersReceived.addListener( //unique objects: frameAncestors
 //   (details) => { request_listener(details, "onHeadersReceived") },
-//   { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script", "object", "other", "web_manifest", "xmlhttprequest", "image", "media"] },
+//   { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script", "object", "other", "web_manifest", "xmlhttprequest"] },
 //   /*["blocking"]*/);
 // browser.webRequest.onAuthRequired.addListener( //unique objects: scheme, realm, isProxy, challenger
 //   (details) => { request_listener(details, "onAuthRequired") },
-//   { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script", "object", "other", "web_manifest", "xmlhttprequest", "image", "media"] });
+//   { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script", "object", "other", "web_manifest", "xmlhttprequest"] });
 // browser.webRequest.onResponseStarted.addListener( //unique objects: 
 //   (details) => { request_listener(details, "onResponseStarted") },
-//   { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script", "object", "other", "web_manifest", "xmlhttprequest", "image", "media"] });
-// browser.webRequest.onBeforeRedirect.addListener( //unique objects: redirectUrl
-//   (details) => { request_listener(details, "onBeforeRedirect") },
-//   { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script", "object", "other", "web_manifest", "xmlhttprequest", "image", "media"] });
+//   { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script", "object", "other", "web_manifest", "xmlhttprequest"] });
+browser.webRequest.onBeforeRedirect.addListener( //unique objects: redirectUrl
+  (details) => { request_listener(details, "onBeforeRedirect") },
+  { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script", "object", "other", "web_manifest", "xmlhttprequest"] });
 // browser.webRequest.onCompleted.addListener( //unique objects: 
 //   (details) => { request_listener(details, "onCompleted") },
-//   { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script", "object", "other", "web_manifest", "xmlhttprequest", "image", "media"] });
-// browser.webRequest.onErrorOccurred.addListener( //unique objects: error
-//   (details) => { request_listener(details, "onErrorOccurred") },
-//   { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script", "object", "other", "web_manifest", "xmlhttprequest", "image", "media"] });
+//   { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script", "object", "other", "web_manifest", "xmlhttprequest"] });
+browser.webRequest.onErrorOccurred.addListener( //unique objects: error
+  (details) => { request_listener(details, "onErrorOccurred") },
+  { urls: ["<all_urls>"], types: ["main_frame", "sub_frame", "script", "object", "other", "web_manifest", "xmlhttprequest"] });

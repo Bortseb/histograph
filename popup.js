@@ -18,6 +18,6 @@ document.addEventListener("click", (e) => {
       browser.runtime.sendMessage({ cmd: "collaborator" });
       break;
     default:
-      console.log("default case worked in background.js");
+      // console.log("default case worked in background.js");
   }
 });
